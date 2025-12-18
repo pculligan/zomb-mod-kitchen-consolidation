@@ -1,6 +1,3 @@
-# zomb-mod-kitchen-consolidation
-Project Zomboid mod for consolidating partial cooking portions where it makes sense. 
-
 # Kitchen Consolidation
 
 **Project Zomboid (Build 41) mod** that reduces food fragmentation by allowing
