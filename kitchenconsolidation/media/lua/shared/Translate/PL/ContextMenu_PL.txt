@@ -1,0 +1,6 @@
+ContextMenu_PL = {
+    ContextMenu_KitchenConsolidation_All = "Scal wszystko",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "Pokrój rybę na kawałki",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "Pokrój mięso na kawałki",
+    ContextMenu_KitchenConsolidation_Type = "Scal (%1)",
+}

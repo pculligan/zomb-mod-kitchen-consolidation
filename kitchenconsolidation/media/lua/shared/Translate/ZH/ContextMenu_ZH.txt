@@ -1,0 +1,6 @@
+ContextMenu_ZH = {
+    ContextMenu_KitchenConsolidation_All = "全部合并",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "切鱼块",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "切肉块",
+    ContextMenu_KitchenConsolidation_Type = "合并（%1）",
+}

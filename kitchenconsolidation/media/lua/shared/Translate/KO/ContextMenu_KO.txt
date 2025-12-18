@@ -1,0 +1,6 @@
+ContextMenu_KO = {
+    ContextMenu_KitchenConsolidation_All = "모두 합치기",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "생선 조각 자르기",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "고기 조각 자르기",
+    ContextMenu_KitchenConsolidation_Type = "합치기 (%1)",
+}

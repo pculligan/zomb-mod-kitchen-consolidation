@@ -1,0 +1,6 @@
+ContextMenu_UK = {
+    ContextMenu_KitchenConsolidation_All = "Об’єднати все",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "Нарізати шматочки риби",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "Нарізати шматочки м’яса",
+    ContextMenu_KitchenConsolidation_Type = "Об’єднати (%1)",
+}

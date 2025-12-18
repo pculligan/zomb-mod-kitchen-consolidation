@@ -1,0 +1,4 @@
+ItemName_ZHTW = {
+    ItemName_KitchenConsolidation.FishPieces = "魚肉塊",
+    ItemName_KitchenConsolidation.MeatPieces = "肉塊",
+}

@@ -1,0 +1,4 @@
+ItemName_UK = {
+    ItemName_KitchenConsolidation.FishPieces = "Шматочки риби",
+    ItemName_KitchenConsolidation.MeatPieces = "Шматочки м’яса",
+}

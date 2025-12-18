@@ -1,0 +1,6 @@
+ContextMenu_EN = {
+    ContextMenu_KitchenConsolidation_Type = "Consolidate (%1)",
+    ContextMenu_KitchenConsolidation_All = "Consolidate All",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "Cut Fish Pieces",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "Cut Meat Pieces",
+}

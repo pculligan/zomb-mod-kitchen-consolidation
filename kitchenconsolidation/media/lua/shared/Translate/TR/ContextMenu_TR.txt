@@ -1,0 +1,6 @@
+ContextMenu_TR = {
+    ContextMenu_KitchenConsolidation_All = "Hepsini Birleştir",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "Balık Parçalarını Kes",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "Et Parçalarını Kes",
+    ContextMenu_KitchenConsolidation_Type = "Birleştir (%1)",
+}

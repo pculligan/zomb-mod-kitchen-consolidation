@@ -1,0 +1,6 @@
+ContextMenu_IT = {
+    ContextMenu_KitchenConsolidation_All = "Consolida tutto",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "Taglia pezzi di pesce",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "Taglia pezzi di carne",
+    ContextMenu_KitchenConsolidation_Type = "Consolida (%1)",
+}

@@ -1,0 +1,4 @@
+ItemName_JA = {
+    ItemName_KitchenConsolidation.FishPieces = "魚の切り身",
+    ItemName_KitchenConsolidation.MeatPieces = "肉の切り身",
+}

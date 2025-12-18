@@ -1,0 +1,4 @@
+ItemName_KO = {
+    ItemName_KitchenConsolidation.FishPieces = "생선 조각",
+    ItemName_KitchenConsolidation.MeatPieces = "고기 조각",
+}

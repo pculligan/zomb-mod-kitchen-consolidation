@@ -1,0 +1,4 @@
+ItemName_TR = {
+    ItemName_KitchenConsolidation.FishPieces = "Balık Parçaları",
+    ItemName_KitchenConsolidation.MeatPieces = "Et Parçaları",
+}

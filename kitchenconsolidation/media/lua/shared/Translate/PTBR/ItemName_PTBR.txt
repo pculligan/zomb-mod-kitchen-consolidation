@@ -1,0 +1,4 @@
+ItemName_PTBR = {
+    ItemName_KitchenConsolidation.FishPieces = "Pedaços de peixe",
+    ItemName_KitchenConsolidation.MeatPieces = "Pedaços de carne",
+}

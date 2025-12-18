@@ -1,0 +1,4 @@
+ItemName_TH = {
+    ItemName_KitchenConsolidation.FishPieces = "ชิ้นปลา",
+    ItemName_KitchenConsolidation.MeatPieces = "ชิ้นเนื้อ",
+}

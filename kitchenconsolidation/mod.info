@@ -1,0 +1,5 @@
+name=Kitchen Consolidation
+id=kitchenconsolidation
+description=Combine partially used ingredients and foods in a deterministic, MP-safe way.
+poster=poster.png
+version=1.0.0

@@ -1,0 +1,4 @@
+ItemName_FR = {
+    ItemName_KitchenConsolidation.FishPieces = "Morceaux de poisson",
+    ItemName_KitchenConsolidation.MeatPieces = "Morceaux de viande",
+}

@@ -1,0 +1,4 @@
+ItemName_ZH = {
+    ItemName_KitchenConsolidation.FishPieces = "鱼肉块",
+    ItemName_KitchenConsolidation.MeatPieces = "肉块",
+}

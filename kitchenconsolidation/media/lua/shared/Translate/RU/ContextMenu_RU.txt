@@ -1,0 +1,6 @@
+ContextMenu_RU = {
+    ContextMenu_KitchenConsolidation_All = "Объединить всё",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "Нарезать рыбу на кусочки",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "Нарезать мясо на кусочки",
+    ContextMenu_KitchenConsolidation_Type = "Объединить (%1)",
+}

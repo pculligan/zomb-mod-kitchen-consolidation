@@ -1,0 +1,4 @@
+ItemName_RU = {
+    ItemName_KitchenConsolidation.FishPieces = "Кусочки рыбы",
+    ItemName_KitchenConsolidation.MeatPieces = "Кусочки мяса",
+}

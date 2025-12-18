@@ -1,0 +1,6 @@
+ContextMenu_TH = {
+    ContextMenu_KitchenConsolidation_All = "รวมทั้งหมด",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "หั่นปลาเป็นชิ้น",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "หั่นเนื้อเป็นชิ้น",
+    ContextMenu_KitchenConsolidation_Type = "รวม (%1)",
+}

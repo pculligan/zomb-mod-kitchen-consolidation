@@ -1,0 +1,240 @@
+
+
+[h1]Kitchen Consolidation[/h1]
+
+Fixes food fragmentation without breaking balance or immersion.
+
+[list]
+[*]Safely combines leftover food
+[*]Lets you prepare small meat and fish pieces into usable piles
+[*]Works with stews and soups without changing vanilla balance
+[*]No free food, no buffs, no recipe overrides
+[/list]
+
+[h2]What problem does this mod solve?[/h2]
+
+In Project Zomboid, food management often breaks down — not because food is scarce, but because it becomes [b]fragmented[/b].
+
+You end up with plenty of food that’s technically edible, but practically useless:
+
+[list]
+[*]Partially-used cans cluttering your inventory
+[*]Many small or partial cuts that can’t be combined
+[*]Leftovers that don’t justify taking up a stew or soup slot
+[*]Cooking systems that punish variety instead of preparation
+[/list]
+
+The result is busywork, not survival gameplay.
+
+[b]Kitchen Consolidation fixes that.[/b]
+
+[h3]Important clarification[/h3]
+
+Many foods already support [b]partial use[/b] — ground beef, butter, lard, and similar items work fine in vanilla.
+
+Kitchen Consolidation doesn’t replace that behavior.
+
+It fixes [b]fragmentation under constraint[/b]:
+[list]
+[*]Too many incompatible leftovers
+[*]Too few ingredient slots
+[*]Perfectly usable food becoming impractical to cook or add
+[/list]
+
+[h2]What this mod does[/h2]
+
+[h3]🥫 Consolidate opened / partial foods[/h3]
+[list]
+[*]Combine opened cans and jars of the same food
+[*]Items must share the [b]same freshness state[/b]
+[*]Empty containers are returned (cans, jars, lids)
+[*]Nutrition, freshness, and sickness are preserved conservatively
+[/list]
+
+[b]Result:[/b] fewer half-cans cluttering your inventory.
+
+[h3]🐟 Prepare fish into Fish Pieces[/h3]
+[list]
+[*]Fish fillets are [b]explicitly prepared[/b]
+[*]Produces [b]Fish Pieces[/b], a fungible pile
+[*]Fish Pieces:
+[list]
+[*]behave like ground meat
+[*]can be partially used
+[*]integrate cleanly into stews and soups
+[/list]
+[*]Raw fish remains dangerous until cooked
+[/list]
+
+[b]Result:[/b] small fish and partial fillets stay useful.
+
+[h3]🥩 Prepare meat into Meat Pieces[/h3]
+[list]
+[*]Raw meats can be prepared into [b]Meat Pieces[/b]
+[*]Works for:
+[list]
+[*]vanilla meats
+[*]modded meats
+[*]containerized meats (e.g. canned ham)
+[/list]
+[*]Containerized meats correctly return empty containers
+[*]Meat Pieces:
+[list]
+[*]are additive piles
+[*]scale by hunger (portion-based)
+[*]work with stews and soups
+[*]preserve sickness and poison behavior
+[/list]
+[/list]
+
+[b]Result:[/b] meat preparation finally works like a real kitchen.
+
+[h2]What this mod does [b]not[/b] do[/h2]
+
+[list]
+[*]No free food
+[*]No nutrition buffs
+[*]No recipe overrides
+[*]No cooking shortcuts
+[*]No “merge raw steaks into super-steak”
+[*]No early warnings about poison or sickness
+[/list]
+
+If something is unsafe, it stays unsafe.  
+If something spoils, it still spoils.
+
+[h2]Design philosophy[/h2]
+
+Kitchen Consolidation follows three rules:
+
+[list=1]
+[*][b]Preparation is explicit[/b]  
+Nothing is merged automatically.
+[*][b]Worst-case safety applies[/b]  
+Mixing food never makes it safer.
+[*][b]Vanilla systems come first[/b]  
+Stews, soups, nutrition, and spoilage all use base-game mechanics.
+[/list]
+
+This mod fixes friction — not difficulty.
+
+[h2]Compatibility[/h2]
+
+Kitchen Consolidation is designed to be [b]compatibility-first[/b].  
+It avoids recipe overrides, global hooks, and invasive patches so it can coexist cleanly with other mods.
+
+[h3]Actively supports (but does not require)[/h3]
+[list]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=1910606509]Soul Filcher's Cooking Time[/url]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2890748284]Food Preservation Plus[/url]
+[/list]
+
+[h3]Transparent to[/h3]
+[list]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2688622178]AnaLGiNs Renewable Food Resources[/url]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3352647720]Can Soup and Stew[/url]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3387549572]CZ Cooking[/url]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2875059598]Herbalist[/url]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3371887045]Hotdogs & Lard / Pickled Meats Addon[/url] (active support coming)
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3265709024]More Jerky[/url] (active support coming)
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2832136889]Sapph's Cooking[/url] (awesome mod! let me know if there is a desire to support something here)
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3515027500]WhopperMod[/url]
+[/list]
+
+Load this mod [b]after[/b] the mods it actively supports.
+
+[h3]How compatibility works[/h3]
+[list]
+[*][b]Vanilla-first behavior[/b]  
+All consolidation and preparation logic builds on existing base-game mechanics (hunger, freshness, evolved recipes).
+[*][b]Whitelist-driven integration[/b]  
+Eligible items are defined via centralized source lists.
+[*][b]Container behavior preserved[/b]  
+Containerized foods correctly return empty containers.
+[/list]
+
+[h3]Multiplayer and saves[/h3]
+[list]
+[*]Multiplayer-safe (no server-only logic or client-only hacks)
+[*]Existing saves supported  
+(new item scripts require new item spawns, as with vanilla)
+[/list]
+
+[h2]Supported languages[/h2]
+
+[list]
+[*]English
+[*]čeština (Czech)
+[*]Deutsch (German)
+[*]español (Spanish)
+[*]français (French)
+[*]italiano (Italian)
+[*]日本語 (Japanese)
+[*]한국어 (Korean)
+[*]polski (Polish)
+[*]português (Portuguese)
+[*]português do Brasil (Brazilian Portuguese)
+[*]русский (Russian)
+[*]ไทย (Thai)
+[*]Türkçe (Turkish)
+[*]українська (Ukrainian)
+[*]中文（简体） (Simplified Chinese)
+[*]中文（繁體） (Traditional Chinese)
+[/list]
+
+English is the source language. Other languages may initially ship with provisional translations and improve over time.
+
+[h2]Contributing translations[/h2]
+
+Translations are generated from English templates and organized by language files.
+
+[b]Guidelines:[/b]
+[list]
+[*]Translate values only — never keys
+[*]Preserve placeholders exactly (e.g. %1)
+[*]Keep translations concise and suitable for in-game UI
+[/list]
+
+To help improve translations:
+[list]
+[*]Open an issue on the Workshop page, or
+[*]Submit a pull request on [url=https://github.com/pculligan/zomb-mod-kitchen-consolidation]GitHub[/url]
+[/list]
+
+[h2]Planned expansion (not promises)[/h2]
+
+[list]
+[*]Additional mod compatibility
+[*]Further reductions in food inventory busywork
+[*]More translations (by request)
+[/list]
+
+Only if they fit the same philosophy.
+
+[h2]In case of issues after updates[/h2]
+
+[list=1]
+[*]Quit the game
+[*]Restart Project Zomboid
+[*]Start a [b]new save[/b] for new item scripts
+[/list]
+
+Item definitions are cached by the B41 engine. I won't code this for B42 until multiplayer comes out and stabilizes a little.
+
+Submit bugs on [url=https://github.com/pculligan/zomb-mod-kitchen-consolidation]GitHub[/url].
+
+[h2]Ask for permission[/h2]
+
+This mod can only be added to and extended with the express permission from the original creator.  
+If no permission is received you may not alter the mod, and it must be treated as a mod that is [b]On Lockdown[/b].  
+You are not allowed to repack this mod under any circumstances.
+
+[url=https://theindiestone.com/forums/index.php?/topic/2530-mod-permissions/#comment-36478]Official disclaimer…[/url]
+
+Contributions are very welcome, particularly around additional mod compatibility.  
+Please submit PRs on [url=https://github.com/pculligan/zomb-mod-kitchen-consolidation]GitHub[/url].
+
+All rights reserved.
+
+[b]Workshop ID / Mod ID[/b]  
+(to be filled in on upload)

@@ -1,0 +1,6 @@
+ContextMenu_JA = {
+    ContextMenu_KitchenConsolidation_All = "すべてまとめる",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "魚肉を切り分ける",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "肉を切り分ける",
+    ContextMenu_KitchenConsolidation_Type = "まとめる（%1）",
+}

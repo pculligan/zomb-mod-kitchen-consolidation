@@ -1,0 +1,6 @@
+ContextMenu_CS = {
+    ContextMenu_KitchenConsolidation_All = "Sloučit vše",
+    ContextMenu_KitchenConsolidation_Make_Fish_Pieces = "Nakrájet kousky ryby",
+    ContextMenu_KitchenConsolidation_Make_Meat_Pieces = "Nakrájet kousky masa",
+    ContextMenu_KitchenConsolidation_Type = "Sloučit (%1)",
+}
