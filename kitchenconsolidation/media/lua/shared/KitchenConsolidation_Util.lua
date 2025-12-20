@@ -6,18 +6,131 @@
 local KitchenConsolidation_Util = {}
 
 -- ---------------------------------------------------------------------------
--- Debug logging (toggleable)
+-- Logging (zero‑overhead when disabled)
 -- ---------------------------------------------------------------------------
 
-KitchenConsolidation_Util.DEBUG = false
+local LOGLEVELS = {
+  TRACE = 1,
+  DEBUG = 2,
+  WARN  = 3,
+  ERROR = 4
+}
 
-function KitchenConsolidation_Util.debug(msg)
-    if KitchenConsolidation_Util.DEBUG then
-        print("[KitchenConsolidation] " .. tostring(msg))
+local function _noop(_) end
+local function _print(msg)
+    print("[KitchenConsolidation] " .. tostring(msg))
+end
+local function _warn(msg)
+    print("[KitchenConsolidation][WARN] " .. tostring(msg))
+end
+local function _error(msg)
+    print("[KitchenConsolidation][ERROR] " .. tostring(msg))
+end
+
+KitchenConsolidation_Util.trace = _noop
+KitchenConsolidation_Util.debug = _noop
+KitchenConsolidation_Util.warn  = _warn
+KitchenConsolidation_Util.error = _error
+
+function KitchenConsolidation_Util.setLogLevel(level)
+    if level == LOGLEVELS.TRACE then
+        KitchenConsolidation_Util.trace = _print
+        KitchenConsolidation_Util.debug = _print
+        KitchenConsolidation_Util.warn  = _warn
+        KitchenConsolidation_Util.error = _error
+    elseif level == LOGLEVELS.DEBUG then
+        KitchenConsolidation_Util.trace = _noop
+        KitchenConsolidation_Util.debug = _print
+        KitchenConsolidation_Util.warn  = _warn
+        KitchenConsolidation_Util.error = _error
+    elseif level == LOGLEVELS.WARN then
+        KitchenConsolidation_Util.trace = _noop
+        KitchenConsolidation_Util.debug = _noop
+        KitchenConsolidation_Util.warn  = _warn
+        KitchenConsolidation_Util.error = _error
+    elseif level == LOGLEVELS.ERROR then
+        KitchenConsolidation_Util.trace = _noop
+        KitchenConsolidation_Util.debug = _noop
+        KitchenConsolidation_Util.warn  = _noop
+        KitchenConsolidation_Util.error = _error
+    else
+        -- Unknown level, default to WARN
+        KitchenConsolidation_Util.trace = _noop
+        KitchenConsolidation_Util.debug = _noop
+        KitchenConsolidation_Util.warn  = _warn
+        KitchenConsolidation_Util.error = _error
     end
 end
 
-local Items = require("KitchenConsolidation_Items")
+-- Default log level is WARN
+KitchenConsolidation_Util.setLogLevel(LOGLEVELS.TRACE)
+
+-- Deprecated compatibility wrapper
+function KitchenConsolidation_Util.setDebug(enabled)
+    if enabled then
+        KitchenConsolidation_Util.setLogLevel(LOGLEVELS.DEBUG)
+    else
+        KitchenConsolidation_Util.setLogLevel(LOGLEVELS.WARN)
+    end
+end
+
+KitchenConsolidation_Util.LOGLEVELS = LOGLEVELS
+
+local Items = require("KitchenConsolidation_ConsolidateItems")
+
+-- ---------------------------------------------------------------------------
+-- Hunger access helpers (authoritative, defensive)
+-- ---------------------------------------------------------------------------
+
+function KitchenConsolidation_Util.getCurrentHunger(item)
+    if not item then
+        KitchenConsolidation_Util.debug("getCurrentHunger: item=nil")
+        return nil
+    end
+
+    if item.getHungChange then
+        local v = item:getHungChange()
+        KitchenConsolidation_Util.debug("getCurrentHunger(getHungChange)=" .. tostring(v))
+        return v
+    end
+
+    if item.getHungerChange then
+        local v = item:getHungerChange()
+        KitchenConsolidation_Util.debug("getCurrentHunger(getHungerChange)=" .. tostring(v))
+        return v
+    end
+
+    KitchenConsolidation_Util.warn("getCurrentHunger: no hunger getter on item " .. tostring(item:getFullType()))
+    return nil
+end
+
+function KitchenConsolidation_Util.setCurrentHunger(item, value)
+    if not item then
+        KitchenConsolidation_Util.warn("setCurrentHunger: item=nil")
+        return false
+    end
+
+    KitchenConsolidation_Util.debug(
+        "setCurrentHunger: attempting to set " ..
+        tostring(value) ..
+        " on " .. tostring(item:getFullType())
+    )
+
+    if item.setHungChange then
+        item:setHungChange(value)
+        KitchenConsolidation_Util.debug("setCurrentHunger(setHungChange) OK")
+        return true
+    end
+
+    if item.setHungerChange then
+        item:setHungerChange(value)
+        KitchenConsolidation_Util.debug("setCurrentHunger(setHungerChange) OK")
+        return true
+    end
+
+    KitchenConsolidation_Util.warn("setCurrentHunger: no hunger setter on item " .. tostring(item:getFullType()))
+    return false
+end
 
 -- ---------------------------------------------------------------------------
 -- Constants / Configuration
@@ -30,108 +143,108 @@ KitchenConsolidation_Util.MERGEABLE_WHITELIST = Items.MERGEABLE_WHITELIST
 KitchenConsolidation_Util.BYPRODUCT_ON_EMPTY = Items.BYPRODUCT_ON_EMPTY
 
 -- ---------------------------------------------------------------------------
--- Eligibility & Quantity
+-- Quantity aggregation (KC_FullHunger-based, authoritative)
 -- ---------------------------------------------------------------------------
 
 function KitchenConsolidation_Util.computeFraction(item)
-    if not instanceof(item, "Food") then return nil end
+    if not instanceof(item, "Food") then
+        KitchenConsolidation_Util.trace("computeFraction: not Food")
+        return nil
+    end
 
-    local base = math.abs(item:getBaseHunger() or 0)
-    if base <= 0 then return nil end
+    local md = item:getModData()
+    local full = md and md.KC_FullHunger
 
-    local cur = math.abs(item:getHungerChange() or 0)
-    local frac = cur / base
+    KitchenConsolidation_Util.trace(
+        "computeFraction: full=" .. tostring(full) ..
+        " for " .. tostring(item:getFullType())
+    )
 
+    if not full or full <= KitchenConsolidation_Util.EPS then
+        KitchenConsolidation_Util.debug("computeFraction: missing/invalid KC_FullHunger")
+        return nil
+    end
+
+    local cur = KitchenConsolidation_Util.getCurrentHunger(item)
+    if not cur then
+        KitchenConsolidation_Util.trace("computeFraction: cur=nil")
+        return nil
+    end
+
+    cur = math.abs(cur)
+
+    if cur <= KitchenConsolidation_Util.EPS then
+        KitchenConsolidation_Util.trace("computeFraction: cur <= EPS")
+        return nil
+    end
+
+    local frac = cur / full
+    KitchenConsolidation_Util.trace("computeFraction: frac=" .. tostring(frac))
     return frac
 end
 
--- ---------------------------------------------------------------------------
--- Quantity aggregation (multi-yield support)
--- ---------------------------------------------------------------------------
-
--- Computes aggregate yield for foods whose "full unit" is defined by
--- getBaseHunger() (e.g., canned goods, dry staples, spices).
---
--- This model assumes:
---   • Hunger fraction is authoritative
---   • Nutrition scales from base hunger
---   • All items share the same base hunger (same fullType)
---
--- NOT appropriate for:
---   • Meats
---   • Cook-state-dependent foods
---   • Foods whose nutrition does not scale linearly with hunger
---
--- Returns:
---   fullCount (integer >= 0)
---   remainderFrac (number in range [0, 1))
-function KitchenConsolidation_Util.computeBaseHungerAggregateYield(sourceItems)
-    if not sourceItems or #sourceItems == 0 then
-        return 0, 0
-    end
-
-    -- Canonical "full" unit is derived from the first item
-    local first = sourceItems[1]
-    if not instanceof(first, "Food") then
-        return 0, 0
-    end
-
-    local base = math.abs(first:getBaseHunger() or 0)
-    if base <= 0 then
-        return 0, 0
-    end
-
-    -- Sum total remaining amount across all source items
-    local totalRemaining = 0
-
-    for _, item in ipairs(sourceItems) do
-        if instanceof(item, "Food") then
-            local cur = math.abs(item:getHungerChange() or 0)
-            if cur > 0 then
-                totalRemaining = totalRemaining + cur
-            end
-        end
-    end
-
-    if totalRemaining <= 0 then
-        return 0, 0
-    end
-
-    -- Compute how many full items we can yield
-    local fullCount = math.floor(totalRemaining / base)
-
-    -- Compute remainder as a fraction of a full item
-    local remainder = totalRemaining - (fullCount * base)
-    local remainderFrac = remainder / base
-
-    -- Clamp for numerical safety
-    if remainderFrac < KitchenConsolidation_Util.EPS then
-        remainderFrac = 0
-    end
-
-    if remainderFrac >= (1.0 - KitchenConsolidation_Util.EPS) then
-        fullCount = fullCount + 1
-        remainderFrac = 0
-    end
-
-    return fullCount, remainderFrac
-end
-
 function KitchenConsolidation_Util.isEligibleFoodItem(item)
-    if not instanceof(item, "Food") then return false end
-
-    local fullType = item:getFullType()
-    if not KitchenConsolidation_Util.MERGEABLE_WHITELIST[fullType] then
+    if not instanceof(item, "Food") then
+        KitchenConsolidation_Util.trace("isEligible: not Food")
         return false
     end
 
-    if item:isRotten() then return false end
+    local fullType = item:getFullType()
+    if not fullType then
+        KitchenConsolidation_Util.trace("isEligible: missing fullType")
+        return false
+    end
+
+    KitchenConsolidation_Util.trace("isEligible: checking " .. fullType)
+
+    -- Auto-whitelist all KitchenConsolidation prepared items
+    local isKC = (string.sub(fullType, 1, #"KitchenConsolidation.") == "KitchenConsolidation.")
+    KitchenConsolidation_Util.trace("isEligible: isKC=" .. tostring(isKC))
+
+    -- Non-KC items must be explicitly whitelisted
+    if not isKC and not KitchenConsolidation_Util.MERGEABLE_WHITELIST[fullType] then
+        KitchenConsolidation_Util.trace("isEligible: not whitelisted")
+        return false
+    end
+
+    if item.isRotten and item:isRotten() then
+        KitchenConsolidation_Util.debug("isEligible: item is rotten")
+        return false
+    end
+
+    local freshness = KitchenConsolidation_Util.getFreshnessBucket(item)
+    if freshness == "rotten" then
+        KitchenConsolidation_Util.debug("isEligible: rejected due to rotten freshness bucket")
+        return false
+    end
+    if freshness == "unknown" then
+        KitchenConsolidation_Util.debug("isEligible: rejected due to unknown freshness bucket")
+        return false
+    end
 
     local frac = KitchenConsolidation_Util.computeFraction(item)
-    if not frac then return false end
+    if not frac then
+        KitchenConsolidation_Util.debug("isEligible: rejected due to missing KC_FullHunger")
+        return false
+    end
 
-    return (frac > KitchenConsolidation_Util.EPS)
-       and (frac < (1.0 - KitchenConsolidation_Util.EPS))
+    KitchenConsolidation_Util.trace(
+        "isEligible: frac=" .. tostring(frac) ..
+        " EPS=" .. tostring(KitchenConsolidation_Util.EPS)
+    )
+
+    if frac <= KitchenConsolidation_Util.EPS then
+        KitchenConsolidation_Util.debug("isEligible: frac <= EPS")
+        return false
+    end
+
+    if frac >= (1.0 - KitchenConsolidation_Util.EPS) then
+        KitchenConsolidation_Util.debug("isEligible: frac >= 1-EPS (full item)")
+        return false
+    end
+
+    KitchenConsolidation_Util.debug("isEligible: ACCEPTED " .. fullType)
+    return true
 end
 
 -- ---------------------------------------------------------------------------
@@ -139,7 +252,12 @@ end
 -- ---------------------------------------------------------------------------
 
 function KitchenConsolidation_Util.buildMergeKey(item)
-    -- Group by fullType + cooked + burnt (Phase 1 strictness)
+    -- Group by:
+    --  - fullType
+    --  - cooked/raw
+    --  - burnt/ok
+    --  - freshness bucket (fresh/stale/rotten)
+
     local cooked = false
     local burnt = false
 
@@ -151,21 +269,77 @@ function KitchenConsolidation_Util.buildMergeKey(item)
         burnt = item:isBurnt()
     end
 
+    local freshness = KitchenConsolidation_Util.getFreshnessBucket(item)
+
+    KitchenConsolidation_Util.trace(string.format(
+        "buildMergeKey: %s cooked=%s burnt=%s freshness=%s",
+        tostring(item:getFullType()),
+        tostring(cooked),
+        tostring(burnt),
+        tostring(freshness)
+    ))
+
     return table.concat({
         item:getFullType(),
         cooked and "cooked" or "raw",
-        burnt and "burnt" or "ok"
+        burnt and "burnt" or "ok",
+        freshness
     }, "|")
 end
 
 function KitchenConsolidation_Util.buildMergeGroups(items)
     local groups = {}
+    -- Authoritative grouping with HARD invariants:
+    -- same fullType, same cooked/raw, same burnt/ok, same freshness bucket
+
+    local keyState = {} -- key -> { freshness, cooked, burnt }
 
     for _, item in ipairs(items) do
-        if KitchenConsolidation_Util.isEligibleFoodItem(item) then
-            local key = KitchenConsolidation_Util.buildMergeKey(item)
-            groups[key] = groups[key] or {}
-            table.insert(groups[key], item)
+        local key = KitchenConsolidation_Util.buildMergeKey(item)
+        local cooked = item.isCooked and item:isCooked() or false
+        local burnt  = item.isBurnt  and item:isBurnt()  or false
+        local freshness = KitchenConsolidation_Util.getFreshnessBucket(item)
+
+        -- Hard exclusion: unknown freshness can never be merged
+        if freshness == "unknown" then
+            KitchenConsolidation_Util.trace(
+                "buildMergeGroups: EXCLUDE " .. tostring(item:getFullType()) .. " (unknown freshness)"
+            )
+        else
+            local state = keyState[key]
+
+            if not state then
+                -- First item defines the invariant for this group
+                keyState[key] = {
+                    freshness = freshness,
+                    cooked    = cooked,
+                    burnt     = burnt
+                }
+                groups[key] = { item }
+            else
+                -- Hard invariant enforcement
+                if state.freshness ~= freshness then
+                    KitchenConsolidation_Util.trace(
+                        "buildMergeGroups: EXCLUDE " .. tostring(item:getFullType()) ..
+                        " (freshness mismatch: got=" .. tostring(freshness) ..
+                        ", expected=" .. tostring(state.freshness) .. ")"
+                    )
+                elseif state.cooked ~= cooked then
+                    KitchenConsolidation_Util.trace(
+                        "buildMergeGroups: EXCLUDE " .. tostring(item:getFullType()) ..
+                        " (cooked mismatch: got=" .. tostring(cooked) ..
+                        ", expected=" .. tostring(state.cooked) .. ")"
+                    )
+                elseif state.burnt ~= burnt then
+                    KitchenConsolidation_Util.trace(
+                        "buildMergeGroups: EXCLUDE " .. tostring(item:getFullType()) ..
+                        " (burnt mismatch: got=" .. tostring(burnt) ..
+                        ", expected=" .. tostring(state.burnt) .. ")"
+                    )
+                else
+                    table.insert(groups[key], item)
+                end
+            end
         end
     end
 
@@ -179,6 +353,8 @@ end
 function KitchenConsolidation_Util.applyWorstCaseFreshness(sourceItems, resultItem)
     if not resultItem or not sourceItems then return end
     if not resultItem.getAge then return end
+
+    KitchenConsolidation_Util.trace("applyWorstCaseFreshness: starting")
 
     local worstAge = 0
     local offAge = nil
@@ -205,10 +381,14 @@ function KitchenConsolidation_Util.applyWorstCaseFreshness(sourceItems, resultIt
     if offAgeMax and resultItem.setOffAgeMax then
         resultItem:setOffAgeMax(offAgeMax)
     end
+
+    KitchenConsolidation_Util.trace("applyWorstCaseFreshness: done")
 end
 
 function KitchenConsolidation_Util.applyWorstCaseSickness(sourceItems, resultItem)
     if not resultItem or not sourceItems then return end
+
+    KitchenConsolidation_Util.trace("applyWorstCaseSickness: starting")
 
     local poisoned = false
     local tainted = false
@@ -228,6 +408,72 @@ function KitchenConsolidation_Util.applyWorstCaseSickness(sourceItems, resultIte
     if tainted and resultItem.setTainted then
         resultItem:setTainted(true)
     end
+
+    KitchenConsolidation_Util.trace("applyWorstCaseSickness: done")
+end
+
+-- ---------------------------------------------------------------------------
+-- Freshness Bucketing (authoritative, non-improving)
+-- ---------------------------------------------------------------------------
+
+function KitchenConsolidation_Util.getFreshnessBucket(item)
+    if not item or not item.getAge or not item.getOffAge or not item.getOffAgeMax then
+        return "unknown"
+    end
+
+    local age = item:getAge()
+    local offAge = item:getOffAge()
+    local offAgeMax = item:getOffAgeMax()
+
+    -- Defensive logging
+    KitchenConsolidation_Util.trace(string.format(
+        "getFreshnessBucket: %s age=%.3f offAge=%.3f offAgeMax=%.3f",
+        tostring(item:getFullType()),
+        tonumber(age) or -1,
+        tonumber(offAge) or -1,
+        tonumber(offAgeMax) or -1
+    ))
+
+    if age >= offAgeMax then
+        return "rotten"
+    elseif age >= offAge then
+        return "stale"
+    else
+        return "fresh"
+    end
+end
+
+-- ---------------------------------------------------------------------------
+-- Merge State Introspection (Freshness‑Aware, Non‑Poison)
+-- ---------------------------------------------------------------------------
+
+function KitchenConsolidation_Util.getMergeState(item)
+    if not item then return nil end
+
+    local cooked = item.isCooked and item:isCooked() or false
+    local burnt  = item.isBurnt  and item:isBurnt()  or false
+    local freshness = KitchenConsolidation_Util.getFreshnessBucket(item)
+
+    return {
+        fullType  = item:getFullType(),
+        cooked    = cooked,
+        burnt     = burnt,
+        freshness = freshness
+    }
+end
+
+function KitchenConsolidation_Util.logMergeState(prefix, item)
+    local s = KitchenConsolidation_Util.getMergeState(item)
+    if not s then return end
+
+    KitchenConsolidation_Util.debug(string.format(
+        "%s mergeState: type=%s cooked=%s burnt=%s freshness=%s",
+        prefix,
+        tostring(s.fullType),
+        tostring(s.cooked),
+        tostring(s.burnt),
+        tostring(s.freshness)
+    ))
 end
 
 -- ---------------------------------------------------------------------------

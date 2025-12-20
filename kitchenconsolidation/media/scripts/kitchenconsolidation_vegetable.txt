@@ -1,0 +1,278 @@
+module KitchenConsolidation
+{
+
+    item AvocadoPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.AvocadoPieces,
+        Icon               = Avocado,
+        Type               = Food,
+        Weight             = 0.3,
+        HungerChange       = -15,
+        ThirstChange       = -7,
+        DaysFresh          = 6,
+        DaysTotallyRotten  = 14,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+    }
+
+    item BellPepperPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.BellPepperPieces,
+        Icon               = BellPepper,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -8,
+        ThirstChange       = -2,
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+    }
+
+    item BroccoliPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.BroccoliPieces,
+        Icon               = Broccoli,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -9,
+        ThirstChange       = -4,
+        DaysFresh          = 4,
+        DaysTotallyRotten  = 6,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+    }
+
+    item CabbagePieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.CabbagePieces,
+        Icon               = Cabbage,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -25,
+        BaseHunger         = -25,
+        ThirstChange       = -15,
+        DaysFresh          = 2,
+        DaysTotallyRotten  = 4,
+        Tags               = Prepared;Vegetable;Ingredient,
+    }
+
+    item CarrotPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.CarrotPieces,
+        Icon               = Carrots,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -8,
+        BaseHunger         = -8,
+        ThirstChange       = -4,
+        DaysFresh          = 6,
+        DaysTotallyRotten  = 8,
+        Tags               = Prepared;Vegetable;Ingredient,
+    }
+
+    item CornPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.CornPieces,
+        Icon               = Corn,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -14,
+        BaseHunger         = -14,
+        ThirstChange       = -4,
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+        Tags               = Prepared;Vegetable;Ingredient,
+    }
+
+    item DaikonPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.DaikonPieces,
+        Icon               = Daikon,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -12,
+        ThirstChange       = -5,
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+    }
+
+    item EggplantPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.EggplantPieces,
+        Icon               = EggPlant,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -16,
+        ThirstChange       = -9,
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+        Tags               = Prepared;Vegetable;Ingredient,
+    }
+
+    item PepperHabaneroPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.PepperHabaneroPieces,
+        Icon               = PepperHabanero,
+        Type               = Food,
+        Weight             = 0.1,
+        HungerChange       = -2,
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+        Tags               = Prepared;Vegetable;Ingredient,
+    }
+
+    item PepperJalapenoPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.PepperJalapenoPieces,
+        Icon               = PepperJalapeno,
+        Type               = Food,
+        Weight             = 0.1,
+        HungerChange       = -2,
+        BaseHunger         = -2,
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+    }
+
+    item LeekPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.LeekPieces,
+        Icon               = Leek,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -12,
+        BaseHunger         = -12,
+        ThirstChange       = -5,
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+    }
+
+    item LettucePieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.LettucePieces,
+        Icon               = Lettuce,
+        Type               = Food,
+        Weight             = 0.7,
+        HungerChange       = -15,
+        ThirstChange       = -7,
+        DaysFresh          = 3,
+        DaysTotallyRotten  = 5,
+        Tags               = Prepared;Vegetable;Ingredient,
+    }
+
+    item MushroomGenericPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.MushroomGenericPieces,
+        Icon               = MushroomGeneric1,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -13,
+        BaseHunger         = -13,
+        ThirstChange       = -1,
+        DaysFresh          = 3,
+        DaysTotallyRotten  = 4,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+        -- Poison handled by source mushroom type; not enabled here
+    }
+
+    item OnionPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.OnionPieces,
+        Icon               = Onion,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -10,
+        BaseHunger         = -10,
+        DaysFresh          = 7,
+        DaysTotallyRotten  = 9,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+    }
+
+    item PotatoPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.PotatoPieces,
+        Icon               = Potato,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -18,
+        BaseHunger         = -18,
+        ThirstChange       = -7,
+        DaysFresh          = 14,
+        DaysTotallyRotten  = 28,
+        Tags               = Prepared;Vegetable;Ingredient,
+    }
+
+    item RedRadishPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.RedRadishPieces,
+        Icon               = RedRadish,
+        Type               = Food,
+        Weight             = 0.1,
+        HungerChange       = -3,
+        ThirstChange       = -1,
+        DaysFresh          = 3,
+        DaysTotallyRotten  = 7,
+        Tags               = Prepared;Vegetable;Ingredient,
+    }
+
+    item SeaweedPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.SeaweedPieces,
+        Icon               = Seaweed,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -3,
+        Tags               = Prepared;Vegetable;Ingredient,
+    }
+
+    item TomatoPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.TomatoPieces,
+        Icon               = Tomato,
+        Type               = Food,
+        Weight             = 0.2,
+        HungerChange       = -12,
+        ThirstChange       = -15,
+        DaysFresh          = 4,
+        DaysTotallyRotten  = 12,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+    }
+
+    item ZucchiniPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.ZucchiniPieces,
+        Icon               = Zucchini,
+        Type               = Food,
+        Weight             = 0.3,
+        HungerChange       = -10,
+        ThirstChange       = -10,
+        DaysFresh          = 6,
+        DaysTotallyRotten  = 14,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+    }
+
+    item TofuPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.TofuPieces,
+        Icon               = Tofu,
+        Type               = Food,
+        Weight             = 0.3,
+        HungerChange       = -10,
+        ThirstChange       = -10,
+        DaysFresh          = 6,
+        DaysTotallyRotten  = 14,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:20;Stew:20
+    }
+
+}

@@ -1,11 +1,9 @@
--- KitchenConsolidation_Items_Containerized.lua
--- Phase 1 containerized fungible foods
--- Items that produce a container byproduct when fully consumed
+-- Phase 1 containerized and fungible foods
 
-local Items = {}
+local Containerized = {}
 
 -- Items eligible for merging
-Items.WHITELIST = {
+Containerized.WHITELIST = {
     -- Opened canned foods (tin can byproduct)
     ["Base.OpenBeans"] = true,
     ["Base.CannedCarrotsOpen"] = true,
@@ -47,6 +45,7 @@ Items.WHITELIST = {
     -- Sauces and condiments in jars
     ["Base.Marinara"] = true,
     ["Base.Soysauce"] = true,
+    ["Base.Pickles"] = true,
 
     -- Oils and vinegars in bottles
     ["Base.OilOlive"] = true,
@@ -60,7 +59,7 @@ Items.WHITELIST = {
 }
 
 -- Container byproducts spawned when an item is fully consumed
-Items.BYPRODUCT_ON_EMPTY = {
+Containerized.BYPRODUCT_ON_EMPTY = {
     -- Tin cans
     ["Base.OpenBeans"] = "Base.TinCanEmpty",
     ["Base.CannedCarrotsOpen"] = "Base.TinCanEmpty",
@@ -114,4 +113,68 @@ Items.BYPRODUCT_ON_EMPTY = {
     ["Base.TomatoPaste"] = "Base.Aluminum",
 }
 
-return Items
+local Fungible = {}
+
+Fungible.WHITELIST = {
+    -- Dried legumes & staples
+    ["Base.Blackbeans"] = true,
+    ["Base.DriedBlackBeans"] = true,
+    ["Base.DriedChickpeas"] = true,
+    ["Base.DriedKidneyBeans"] = true,
+    ["Base.DriedLentils"] = true,
+    ["Base.DriedSplitPeas"] = true,
+    ["Base.DriedWhiteBeans"] = true,
+    ["Base.SoybeansSeed"] = true,
+    ["Base.Soybeans"] = true,
+
+    -- Processed bulk ingredients & seasonings
+    ["Base.Salt"] = true,
+    ["Base.SeasoningSalt"] = true,
+    ["Base.Sugar"] = true,
+    ["Base.SugarBrown"] = true,
+    ["Base.SugarPacket"] = true,
+    ["Base.SugarCubes"] = true,
+    ["Base.Honey"] = true,
+    ["Base.MapleSyrup"] = true,
+    ["Base.PowderedGarlic"] = true,
+    ["Base.PowderedOnion"] = true,
+    ["Base.Pepper"] = true,
+
+    -- Frozen / packaged vegetables
+    ["Base.CornFrozen"] = true,
+    ["Base.Peas"] = true,
+    ["Base.MixedVegetables"] = true,
+
+    -- Seasonings (explicit seasoning items only)
+    ["Base.Seasoning_Basil"] = true,
+    ["Base.Seasoning_Chives"] = true,
+    ["Base.Seasoning_Cilantro"] = true,
+    ["Base.Seasoning_Oregano"] = true,
+    ["Base.Seasoning_Parsley"] = true,
+    ["Base.Seasoning_Rosemary"] = true,
+    ["Base.Seasoning_Sage"] = true,
+    ["Base.Seasoning_Thyme"] = true,
+
+    -- Dry staples, spreads, snack bags, and feeds
+    ["Base.OatsRaw"] = true,
+    ["Base.Cereal"] = true,
+    ["Base.CocoaPowder"] = true,
+    ["Base.Coffee2"] = true,
+    ["Base.JamFruit"] = true,
+    ["Base.PeanutButter"] = true,
+    ["Base.TortillaChips"] = true,
+    ["Base.Crisps"] = true,
+    ["Base.Crisps2"] = true,
+    ["Base.Crisps3"] = true,
+    ["Base.Crisps4"] = true,
+    ["Base.CatFoodBag"] = true,
+    ["Base.DogFoodBag"] = true,
+
+    -- Dry grains, pasta, and noodles
+    ["Base.Ramen"] = true,
+    ["Base.Macaroni"] = true,
+    ["Base.Pasta"] = true,
+    ["Base.Rice"] = true,
+}
+
+return Containerized, Fungible

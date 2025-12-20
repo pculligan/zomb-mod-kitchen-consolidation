@@ -26,212 +26,155 @@ This mod adds a **safe, deterministic, MP-compatible** way to consolidate partia
 - Changing or eliminating empty container byproducts resulting from food consumption.
 - Consolidating alcohol, beverages, or other drinkable items that already use vanilla drainable or container mechanics (e.g., bottles, cans, mugs).
 
-## Phased Scope
 
-This mod will be implemented in explicit phases to manage complexity and set clear expectations.
+## Unified Model: Preparation and Consolidation
 
-### Phase 1 (Initial Release)
-Supported mergeable food classes:
-- Opened canned foods
-- Dried beans
+Kitchen Consolidation operates on two distinct but complementary actions:
 
-Phase 1 focuses on foods with minimal hidden state and linear consumption semantics.
+- **Preparation** — an explicit, irreversible step that converts a discrete food item
+  into a prepared form.
+- **Consolidation** — a deterministic merge of multiple partially used prepared items
+  into fewer, fuller items of the same type.
 
-### Phase 2 (Fish and Discrete Ingredients)
+These actions are intentionally separate and apply uniformly across supported foods.
 
-Phase 2 extends Kitchen Consolidation to address **discrete food ingredients**—specifically fish—where direct consolidation into a larger item would violate player expectations and culinary realism.
+---
 
-#### Problem Statement
+## Preparation Model (Authoritative)
 
-In Project Zomboid, stews and similar recipes accept a **fixed number of ingredient slots** (typically 6). When players accumulate many small or partially used fish fillets, the slot limit causes stews to be less effective than the total available food would imply.
+### Design Rule
 
-Unlike canned goods or dried beans, fish fillets are **discrete physical ingredients**, not fungible volumes. Treating multiple small fillets as a single large fillet is unintuitive and undesirable.
+**Prepared items preserve the same consumption semantics as their source item.  
+The only added behavior is that prepared items are combinable.**
 
-Phase 2 addresses this mismatch by introducing an explicit **preparation step**, rather than extending consolidation semantics beyond their appropriate boundary.
+This rule ensures:
+- vanilla cooking behavior is preserved
+- cooking skill effects are preserved
+- multiplayer behavior remains deterministic
+- no artificial “unit” abstractions are introduced
 
-#### Phase 2 Design Principle
+Preparation never improves food quality, safety, or nutrition.
 
-**Consolidation applies to fungible volume.  
-Preparation applies to discrete ingredients.**
+---
 
-Fish fillets are treated as discrete ingredients that may be *processed* into a fungible form suitable for consolidation and cooking.
+### Preparation Semantics
 
-#### Phase 2 Approach: Fish Pieces (Preparation-Based)
+When an item is prepared:
 
-Phase 2 introduces a new intermediate food item:
+- The resulting prepared item:
+  - uses the same `Food` type and partial-use behavior as the source
+  - preserves hunger, nutrition, freshness, sickness, and poison state
+  - may be cooked, eaten, or used in recipes exactly like the source item
+- Identity of the source item is discarded only at preparation time
+- No automatic preparation occurs; all preparation is explicit
 
-```
-FishPieces
-```
+Examples:
+- Fish fillet → Fish Pieces
+- Raw meat cut → Meat Pieces
+- Cabbage → Chopped Cabbage
+- Potato → Chopped Potato
 
-This item represents prepared fish suitable for bulk cooking, not a single intact fillet.
+Prepared items differ from their sources only in name, icon, and combinability.
 
-##### Key Properties
+---
 
-- `FishPieces` is a `Food` item with:
-  - Fungible quantity semantics
-  - Base hunger defining a “full unit”
-  - Linear consumption behavior
-- `FishPieces` is treated as an **additive pile**:
-  - Preparing additional fish **adds to the total quantity** of FishPieces
-  - FishPieces has no inherent upper size limit beyond its remaining quantity
-  - Consolidation may later reduce the number of FishPieces items, but not the total amount
-- Fish fillets are **never merged into larger fillets**
-- Consolidation logic remains unchanged and is applied **only** to `FishPieces`
+### Preparation Scope
 
-#### Phase 2 Workflow
+Preparation applies to **discrete food items** that:
+- are partially consumed by vanilla cooking
+- produce unusable leftovers due to lack of combinability
+- benefit from explicit processing
 
-> **Design Note: Additive Preparation Model**
->
-> Preparing fish fillets into FishPieces is an explicit **preparation step** that
-> intentionally discards fillet identity and size semantics. Once prepared, all
-> contributions are treated as additive quantities of fish meat.
->
-> This avoids attempting to infer or normalize fillet size and aligns with vanilla
-> behavior, where fish size matters only until processing. The additive model also
-> cleanly resolves cooking slot pressure without introducing unrealistic “large
-> fillet” transformations.
+Examples include:
+- fish fillets
+- raw meat cuts
+- whole vegetables (e.g., cabbage, potatoes)
 
-1. **Preparation Step**
-   - Players convert partial or small fish fillets into `FishPieces`
-   - This occurs via an explicit action (e.g., “Prepare Fish”), not automatically
-   - This step may require a tool (e.g., knife) but is intentionally simple
+Items already treated as fungible piles in vanilla (e.g., ground beef) are excluded.
 
-2. **Consolidation Step**
-   - `FishPieces` behave like other fungible foods:
-     - Eligible for Kitchen Consolidation
-     - Can be merged into fewer, fuller `FishPieces` items
-   - Multi-yield rules apply as in Phase 1
+---
 
-3. **Cooking Integration**
-   - Stew and soup recipes are updated to accept:
-     - Existing fish fillets (unchanged behavior)
-     - `FishPieces` (new behavior)
-   - This allows many small contributions to meaningfully affect cooking outcomes without exceeding slot limits
+## Consolidation Model (Authoritative)
 
-#### Phase 2 Guarantees
+### Design Rule
 
-- No fish fillet is ever transformed into a “larger” fillet
-- Ingredient identity is preserved until an explicit preparation step
-- Consolidation semantics remain limited to fungible foods
-- Cooking balance is improved without modifying base cooking mechanics
+**Consolidation applies only to prepared items and other fungible quantities.  
+Discrete source items are never consolidated directly.**
 
-#### Phase 2 Non-Goals
+Consolidation preserves vanilla expectations by:
+- merging only identical item types
+- requiring identical cooked/burnt state
+- requiring identical freshness state (default strict mode)
+- preserving worst-case safety
 
-Phase 2 explicitly does **not** attempt to:
-- Automatically convert fillets during cooking
-- Change the number of ingredient slots in vanilla recipes
-- Reinterpret fish fillet size or weight heuristically
-- Apply consolidation semantics directly to meats or whole fish
+---
 
-Those concerns are deferred to later phases.
+### Consolidation Semantics
 
-#### Phase 2 Extension Path
+- Only prepared items (e.g., Fish Pieces, Meat Pieces, Chopped Vegetables)
+  and other fungible foods (opened cans, dried beans) are eligible
+- Consolidation:
+  - reduces item count
+  - never increases total quantity
+  - never improves quality or safety
+- Multi-yield consolidation rules apply deterministically
 
-The `FishPieces` pattern establishes a reusable model for future phases, including:
-- Ground meat
-- Tenderized meat
-- Minced or chopped ingredients
+Prepared items behave identically to opened cans for consolidation purposes.
 
-Later phases may generalize this into a broader **Kitchen Preparation** system, but Phase 2 intentionally remains narrow.
+---
 
-### Phase 3 (Prepared Meats)
+## Cooking and Recipe Integration
 
-Phase 3 generalizes the preparation model introduced in Phase 2 to **all discrete meat items**.
+Prepared items participate in vanilla cooking systems without overrides.
 
-Rather than introducing multiple prepared meat variants (e.g., ground, chopped, tenderized),
-Phase 3 adopts a **single fungible prepared meat form**:
+- Stews and soups consume prepared items using:
+  - the same partial-consumption logic as their source items
+  - cooking skill–scaled consumption
+- No recipe slot counts are changed
+- No vanilla recipes are overridden
 
-```
-MeatPieces
-```
+This preserves balance while allowing leftovers to remain usable.
 
-This mirrors the behavior and semantics of `FishPieces` exactly.
+---
 
-#### Phase 3 Design Principle
+## Multiplayer Guarantees
 
-**Discrete meat identity is preserved until preparation.  
-Prepared meat is fungible and additive.**
+Kitchen Consolidation preserves vanilla multiplayer behavior.
 
-All raw meat types (beef, pork, rabbit, bird meat, modded meats, etc.) may be explicitly
-prepared into `MeatPieces`. Once prepared, individual meat identity is intentionally discarded.
+- All inventory mutation occurs in timed actions
+- Server remains authoritative
+- Partial-consumption semantics are unchanged
+- Minor numerical differences between SP and MP are accepted as vanilla behavior
 
-#### Phase 3 Approach: Meat Pieces (Unified Preparation)
+No attempt is made to “fix” multiplayer normalization quirks.
 
-- `MeatPieces` is a `Food` item with:
-  - Fungible quantity semantics
-  - Additive pile behavior
-  - Hunger as the authoritative quantity metric
-  - Weight scaling with remaining quantity
-  - Dangerous when uncooked (vanilla raw-meat semantics)
-- Preparation aggregates **absolute hunger** across source meats
-- Source eligibility is determined by a **centralized whitelist**:
-  ```
-  Meats.SOURCES
-  ```
-- Only items explicitly listed as sources may be prepared
-- One `MeatPieces` pile exists per inventory (no fragmentation)
-- Worst-case freshness and sickness propagate conservatively
-- Poison/taint propagates silently and irreversibly
-- **Containerized meat sources** (e.g. canned ham) may emit empty-container
-  byproducts according to:
-  ```
-  Meats.BYPRODUCT_ON_EMPTY
-  ```
-  Raw meats do not emit byproducts
+---
 
-This avoids:
-- pretending different meats are interchangeable before preparation
-- inventing artificial distinctions between “ground” vs “chopped”
-- unnecessary recipe or UI complexity
+## Non-Goals
 
-#### Phase 3 Workflow
+This mod does **not** attempt to:
+- merge discrete source items directly
+- normalize food sizes or weights
+- invent artificial portion units
+- override vanilla cooking recipes
+- force exact hunger decrements in multiplayer
+- mix different prepared food types (e.g., mixed vegetables)
 
-1. **Preparation Step**
-   - Players explicitly prepare raw meats into `MeatPieces`
-   - Requires an appropriate tool (e.g., knife, cleaver)
-   - No automatic conversion occurs
+These concerns may be addressed by future features but are explicitly out of scope.
 
-2. **Consolidation Step**
-   - `MeatPieces` are eligible for Kitchen Consolidation
-   - Multi-yield consolidation rules apply identically to Phase 1
+---
 
-3. **Cooking Integration**
-   - `MeatPieces` participate in evolved recipes:
-     ```
-     EvolvedRecipe = Soup:X;Stew:X;
-     ```
-   - Portion-based consumption via hunger (ground-beef semantics)
-   - No vanilla recipe overrides
+## Extension Path (Future Work)
 
-#### Phase 3 Guarantees
+This unified model supports future additions cleanly:
 
-- No discrete meat item is ever consolidated directly
-- Preparation is explicit and irreversible
-- Prepared meat behaves identically regardless of source animal
-- Cooking balance is preserved via portion-based consumption
-- No additional Lua hooks are required beyond preparation actions
-- Preparation logic does **not** reuse Phase 1 mergeable-item semantics.
-  Raw meats are never considered mergeable; they are only eligible as
-  preparation sources.
-#### Phase 3 Lessons Applied
+- Additional prepared vegetables
+- Additional prepared meats or fish
+- Optional mixed-preparation recipes (e.g., Mixed Vegetables)
+- Sandbox toggles for strictness
 
-Phase 3 explicitly applies lessons learned in Phase 2:
-
-- Preparation uses **absolute hunger aggregation**, not base-unit fractions,
-  because source and target items do not share hunger units
-- Preparation inputs are **deduplicated by object identity** to account for
-  context-menu duplication behavior
-- Safety semantics (dangerous when uncooked, poison/taint) are preserved
-  without early UX signaling
-- EvolvedRecipe participation is used for stew/soup integration rather than
-  custom recipe overrides or Lua hooks
-
-These constraints are intentional and should not be relaxed without
-strong justification.
-
-This unified approach minimizes complexity, maximizes compatibility,
-and leverages the proven FishPieces pattern without duplication.
+All extensions must preserve the core rule:
+**prepared items preserve source semantics; consolidation only reduces fragmentation.**
 
 ## Conceptual Eligibility Boundary
 
@@ -269,7 +212,7 @@ For these items, merging would constitute **transformation or crafting**, not co
 
 ## Design Summary
 
-### Recommended Approach (Approach A)
+### Recommended Approach
 Implement **multi-yield virtual drainable consolidation** by:
 - Treating each `Food` item’s remaining quantity as a **fraction** of its base hunger value.
 - Partitioning inputs into **full** and **partial** items.
@@ -345,13 +288,13 @@ Responsibilities:
 
 All inventory mutations occur here.
 
-#### Server-Side Code (Phase 1)
+#### Server-Side Code
 
-Phase 1 does not require a dedicated server-side Lua file.
+No dedicated server-side Lua file is required for preparation or consolidation actions.
 
 All inventory mutation occurs inside a timed action defined in shared code, which is authoritative and multiplayer-safe in both listen-server and dedicated-server environments.
 
-A server-only Lua file may be introduced in future phases if additional server-side validation, logging, or sandbox enforcement is required.
+A server-only Lua file may be introduced in the future if additional server-side validation, logging, or sandbox enforcement is required.
 
 ### Core Data Flow
 
@@ -412,9 +355,9 @@ When player right-clicks inventory selection that includes eligible items:
 
 ## Eligibility Rules
 
-### Base Eligibility (Deterministic, Phase 1)
+### Base Eligibility (Deterministic)
 
-An item is eligible for merging in Phase 1 if all of the following are true:
+An item is eligible for consolidation if all of the following are true:
 - `instanceof(item, "Food")`
 - `item:getFullType()` is present in the mergeable whitelist
 - Remaining quantity fraction satisfies `0.0 < fraction < 1.0` (with epsilon tolerance)
@@ -422,11 +365,11 @@ An item is eligible for merging in Phase 1 if all of the following are true:
 - Item is not frozen (optional; configurable)
 - Item is not a container or composite item
 
-These rules apply uniformly to all Phase 1 food classes.
+These rules apply uniformly to all supported food classes, including prepared items.
 
 ### Mergeable Item Detection (Whitelist-Based)
 
-This mod uses an explicit whitelist to determine which items are eligible for merging.
+This mod uses an explicit whitelist to determine which items are eligible for consolidation.
 
 An item is considered a mergeable food item **if and only if** all of the following are true:
 - `instanceof(item, "Food")`
@@ -445,14 +388,14 @@ This guarantees deterministic behavior, multiplayer safety, and mod compatibilit
 
 Items can only be merged if they match on the following (configurable strictness):
 
-### Required State Match (Phase 1)
+### Required State Match
 
-Items may only be merged if all of the following states match:
+Items may only be consolidated if all of the following states match:
 - Identical `fullType`
 - Same cooked state
 - Same burnt state
 
-Freshness and food sickness risk are not considered for *eligibility* in Phase 1, but are applied conservatively during the merge process using worst-case rules.
+Freshness and food sickness risk are not considered for *eligibility*, but are applied conservatively during the merge process using worst-case rules.
 
 ### Optional match (configurable)
 - Freshness / spoilage:
@@ -465,15 +408,15 @@ Freshness handling is tricky and may be a future enhancement.
 
 ---
 
-## Phase 1 Guarantees and Conservative Rules
+## Consolidation Guarantees and Conservative Rules
 
-Phase 1 intentionally adopts a *conservative realism* model. Merging food items never improves quality or safety; it only consolidates remaining contents.
+Kitchen Consolidation intentionally adopts a *conservative realism* model. Consolidating food items never improves quality or safety; it only reduces fragmentation.
 
-### Guaranteed Behaviors (Phase 1)
+### Guaranteed Behaviors
 
-The following behaviors are guaranteed in Phase 1:
+The following behaviors are guaranteed:
 
-- Deterministic merging based on identical `fullType`
+- Deterministic consolidation based on identical `fullType`
 - Hunger preservation using the authoritative fraction model
 - Nutrition preservation (calories and macros) where deterministically accessible
 - Freshness preservation using a **worst-case rule**
@@ -485,28 +428,28 @@ The following behaviors are guaranteed in Phase 1:
 The following conservative rules apply:
 
 #### Freshness (Worst-Case Wins)
-When merging items with freshness data:
-- The merged item inherits the *worst* freshness state of any source item
-- Freshness is never improved by merging
-- If any source item is stale or near-rot, the merged item reflects that state
+When consolidating items with freshness data:
+- The consolidated item inherits the *worst* freshness state of any source item
+- Freshness is never improved by consolidation
+- If any source item is stale or near-rot, the consolidated item reflects that state
 
 #### Food Sickness / Taint (Worst-Case Wins)
 When sickness, poison, or taint flags are accessible:
-- If any source item is flagged as risky, the merged item is flagged as risky
-- Merging never removes or reduces food sickness risk
+- If any source item is flagged as risky, the consolidated item is flagged as risky
+- Consolidation never removes or reduces food sickness risk
 - If sickness flags are not deterministically accessible, behavior is unchanged
 
 #### Weight (Capped Weighted Merge)
 When weight values are accessible:
 - Weight is combined proportionally using remaining fractions
 - The resulting item weight is capped at the canonical weight of a full item
-- The merged item can never exceed the encumbrance of a pristine full item
+- The consolidated item can never exceed the encumbrance of a pristine full item
 
 This prevents encumbrance exploits and preserves vanilla balance.
 
-### Empty Container Byproducts (Phase 1)
+### Empty Container Byproducts
 
-When merging food items that originate from containers (e.g., opened canned foods), the merge process produces empty container items as a byproduct.
+When consolidating food items that originate from containers (e.g., opened canned foods), the process produces empty container items as a byproduct.
 
 Rules:
 - Empty containers are produced based on **net container loss**, not per-item removal.
@@ -536,7 +479,7 @@ fraction = abs(food:getHungerChange()) / abs(food:getBaseHunger())
 ```
 
 Rules:
-- If `baseHunger <= 0`, the item is not mergeable.
+- If `baseHunger <= 0`, the item is not eligible for consolidation.
 - The fraction is clamped conceptually to the range `[0.0, 1.0]`.
 
 An item is considered *partially used* **if and only if**:
@@ -547,7 +490,7 @@ An item is considered *partially used* **if and only if**:
 
 Comparisons should be performed using a small epsilon tolerance to account for floating-point error (e.g., `EPS = 0.0001`).
 
-Items with `fraction <= 0.0` or `fraction >= 1.0` are not eligible for merging.
+Items with `fraction <= 0.0` or `fraction >= 1.0` are not eligible for consolidation.
 
 ### Merge Result Fraction
 ```
@@ -555,7 +498,7 @@ merged_fraction = min(fractionA + fractionB, 1.0)
 remainder_fraction = (fractionA + fractionB) - 1.0  (if > 0)
 ```
 
-Phase 1 uses **bulk aggregation**, not iterative pairwise merging:
+Kitchen Consolidation uses **bulk aggregation**, not iterative pairwise merging:
 
 ```
 totalRemaining = Σ remaining amounts
@@ -595,7 +538,7 @@ If item weight varies with remaining quantity:
 
 **Recommendation:** do not attempt to modify weight unless values are exposed and consistent. Many mods do weird things with weight.
 
-In Phase 1, nutrition preservation is achieved implicitly via the multi-yield model.
+Nutrition preservation is achieved implicitly via the multi-yield model.
 Because nutrition in Build 41 is base-hunger–scaled, producing the correct number
 of full and partial items preserves calories and macros without manually summing
 nutrition into a single item. Single-result nutrition recomputation is intentionally
@@ -606,7 +549,7 @@ avoided.
 ## Multiplayer Safety
 
 ### Use Timed Actions
-All inventory changes should happen inside a timed action, even if instantaneous, to keep MP sync clean.
+All inventory changes for preparation and consolidation should happen inside a timed action, even if instantaneous, to keep MP sync clean.
 
 Recommended:
 - Create `ISKitchenConsolidationAction` extending `ISBaseTimedAction`
@@ -676,8 +619,8 @@ Then:
 
 ---
 
-## Algorithm (Authoritative, Phase 1)
-The following algorithm is the authoritative and mandatory behavior for Phase 1 merging.
+## Algorithm (Authoritative)
+The following algorithm is the authoritative and mandatory behavior for consolidation:
 
 1. Compute remaining fraction for each input item.
 2. Partition inputs into **full** and **partial** items.
@@ -708,14 +651,14 @@ If macros/cals are nil:
 - or block merge depending on strictness
 **Recommendation:** merge hunger only, keep macro merge best-effort.
 
-### Freshness / Spoilage (Phase 1)
+### Freshness / Spoilage
 
-Freshness is preserved conservatively in Phase 1 using a worst-case rule.
+Freshness is preserved conservatively using a worst-case rule.
 
 When freshness data is accessible:
-- The merged item inherits the worst freshness state of all source items
+- The consolidated item inherits the worst freshness state of all source items
 - Freshness is never averaged or improved
-- If any source item is close to rotting, the merged item reflects that risk
+- If any source item is close to rotting, the consolidated item reflects that risk
 
 This behavior is intentional and aligns with vanilla player expectations.
 
@@ -818,5 +761,9 @@ This mod is:
 - Conservative in balance and realism
 - Explicit about guarantees and limitations
 - Designed to consolidate convenience without improving food quality
-- Structured for phased expansion to more complex food classes
+- Structured for unified, explicit preparation and consolidation of food classes
 - Enforces a clear conceptual boundary between fungible quantities and discrete food objects
+
+
+
+

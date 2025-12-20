@@ -123,6 +123,34 @@ def read_domain_table(path: Path) -> DomainTable:
     return DomainTable(domain=domain, table_name=table_name, entries=entries)
 
 
+def validate_existing_target(
+    src: DomainTable,
+    existing_path: Path,
+    lang: str,
+) -> None:
+    """
+    Ensure an existing target translation file has:
+    - no extra keys
+    - no missing keys
+    compared to the EN source.
+    """
+    existing = read_domain_table(existing_path)
+
+    src_keys = set(src.entries.keys())
+    existing_keys = set(existing.entries.keys())
+
+    extra = sorted(existing_keys - src_keys)
+    missing = sorted(src_keys - existing_keys)
+
+    if extra or missing:
+        msg = [f"[{lang}] Translation drift detected in {existing_path}:"]
+        if extra:
+            msg.append(f"  Extra keys ({len(extra)}): {extra[:10]}{'...' if len(extra) > 10 else ''}")
+        if missing:
+            msg.append(f"  Missing keys ({len(missing)}): {missing[:10]}{'...' if len(missing) > 10 else ''}")
+        raise ValueError("\n".join(msg))
+
+
 def write_domain_table(out_path: Path, domain: str, lang: str, entries: Dict[str, str]) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -296,7 +324,9 @@ def main() -> int:
             out_path = target_dir / f"{domain}_{lang}.txt"
 
             if out_path.exists() and not args.force:
-                print(f"Skipping existing: {out_path}")
+                # Validate existing file for drift before skipping
+                validate_existing_target(tbl, out_path, lang)
+                print(f"Skipping existing (validated): {out_path}")
                 continue
 
             prompt = build_translation_prompt(tbl.domain, lang, tbl.entries)
@@ -308,6 +338,7 @@ def main() -> int:
             if args.dry_run:
                 print(f"[dry-run] Would write: {out_path}")
             else:
+                # Overwrite unconditionally when --force is set
                 write_domain_table(out_path, tbl.domain, lang, translated)
                 print(f"Wrote: {out_path}")
 

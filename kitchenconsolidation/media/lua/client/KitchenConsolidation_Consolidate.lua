@@ -1,27 +1,12 @@
--- KitchenConsolidation_Context.lua
+-- KitchenConsolidation_Consolidate.lua
 -- Client-side context menu integration
 -- No inventory mutation allowed in this file
 
 local Util = require("KitchenConsolidation_Util")
-local Action = require("KitchenConsolidation_Action")
-local PrepareFishAction = require("KitchenConsolidation_PrepareFish")
-local PrepareMeatAction = require("KitchenConsolidation_PrepareMeat")
-
-require("KitchenConsolidation_Translations")
-
--- Verify translation table injection (Build 41)
-if ContextMenu_EN then
-    Util = Util or require("KitchenConsolidation_Util")
-    Util.debug("ContextMenu_EN table exists")
-    Util.debug("ContextMenu_KitchenConsolidation = " .. tostring(ContextMenu_EN["ContextMenu_KitchenConsolidation"]))
-    Util.debug("ContextMenu_KitchenConsolidation_Type = " .. tostring(ContextMenu_EN["ContextMenu_KitchenConsolidation_Type"]))
-    Util.debug("ContextMenu_KitchenConsolidation_All = " .. tostring(ContextMenu_EN["ContextMenu_KitchenConsolidation_All"]))
-else
-    Util = Util or require("KitchenConsolidation_Util")
-    Util.debug("ERROR: ContextMenu_EN table does NOT exist")
+local ConsolidateAction = require("TimedActions/KitchenConsolidation_ConsolidateAction")
+if not (ConsolidateAction and ConsolidateAction.new) then
+    Util.warn("Consolidate.lua: ConsolidateAction:new is missing (require returned " .. tostring(ConsolidateAction) .. ")")
 end
-
-
 
 -- ---------------------------------------------------------------------------
 -- Helpers
@@ -56,69 +41,69 @@ end
 -- ---------------------------------------------------------------------------
 
 local function addCombineOptions(player, context, worldobjects, test)
-    if test then return true end
+    Util.debug("Consolidate: OnFillInventoryObjectContextMenu fired")
 
-    Util.debug("Context menu invoked")
-    local lang = "unknown"
-
-    -- Safely resolve language without calling methods in conditionals
-    if type(getLanguage) == "function" then
-        lang = getLanguage()
-    else
-        local core = (type(getCore) == "function") and getCore() or nil
-        if core and type(core.getLanguage) == "function" then
-            lang = core:getLanguage()
-        end
+    if test then
+        Util.debug("Consolidate: test=true, returning early")
+        return true
     end
 
-    Util.debug("Active game language = " .. tostring(lang))
-
     local playerObj = getSpecificPlayer(player)
-    if not playerObj then return end
+    if not playerObj then
+        Util.debug("Consolidate: getSpecificPlayer returned nil")
+        return
+    end
 
     local rawItems = unwrapInventoryItems(worldobjects)
+    Util.debug("Consolidate: flattened items = " .. tostring(#rawItems))
+
     local eligible = getEligibleItems(rawItems)
-    Util.debug("Eligible items count: " .. tostring(#eligible))
+    Util.debug("Consolidate: eligible items = " .. tostring(#eligible))
+    if #eligible < 2 then
+        Util.debug("Consolidate: fewer than 2 eligible items; returning")
+        return
+    end
 
-    if #eligible < 2 then return end
-
-    -- Group eligible items using authoritative util logic
     local groups = Util.buildMergeGroups(eligible)
     local groupCount = 0
-
-    for _, items in pairs(groups) do
+    for key, items in pairs(groups) do
+        Util.debug("Consolidate: group " .. tostring(key) .. " has " .. tostring(#items) .. " items")
         if #items > 1 then
             groupCount = groupCount + 1
         end
     end
 
-    if groupCount == 0 then return end
+    if groupCount == 0 then
+        Util.debug("Consolidate: no groups with more than one item; returning")
+        return
+    end
 
-    -- Per-group options (top-level)
     for _, items in pairs(groups) do
         if #items > 1 then
             local item = items[1]
             local label = getText("ContextMenu_KitchenConsolidation_Type", item:getDisplayName())
-            Util.debug("Group label resolved to: " .. tostring(label))
+            Util.debug("Consolidate: adding menu option '" .. tostring(label) .. "'")
 
             context:addOption(label, items, function()
+                Util.debug("Consolidate: dispatching ConsolidateAction for " .. tostring(#items) .. " items")
                 ISTimedActionQueue.add(
-                    Action:new(playerObj, items)
+                    ConsolidateAction:new(playerObj, items)
                 )
             end)
         end
     end
 
-    -- Combine All option (only if multiple groups)
     if groupCount > 1 then
         context:addSeparator()
         local allLabel = getText("ContextMenu_KitchenConsolidation_All")
-        Util.debug("Combine All label resolved to: " .. tostring(allLabel))
+        Util.debug("Consolidate: adding Combine All option '" .. tostring(allLabel) .. "'")
+
         context:addOption(allLabel, eligible, function()
             for _, items in pairs(groups) do
                 if #items > 1 then
+                    Util.debug("Consolidate: dispatching ConsolidateAction (all) for " .. tostring(#items) .. " items")
                     ISTimedActionQueue.add(
-                        Action:new(playerObj, items)
+                        ConsolidateAction:new(playerObj, items)
                     )
                 end
             end

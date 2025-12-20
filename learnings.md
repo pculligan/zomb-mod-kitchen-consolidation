@@ -569,3 +569,128 @@ Every time a non-obvious engine behavior is discovered:
 - reference it in future phases
 
 This document prevented multiple regressions and should be treated as a **living reference** for future Build-41 mods.
+
+---
+
+## 31. Item Script Values Are Not Guaranteed to Survive Runtime Mutation
+
+A key debugging outcome from Phase‑2/3 work was discovering that **item script fields cannot be assumed to persist unchanged once an item is spawned and mutated at runtime**.
+
+Specifically:
+
+- `BaseHunger` may be reset to `0` when:
+  - an item is spawned via `AddItem()`
+  - `setHungChange()` is called
+  - a custom prepare action mutates the item
+- This can occur **even when the item script defines `BaseHunger` correctly**
+
+---
+
+## 32. Context Menu Evaluation Is Hot-Path Code
+
+Context menu hooks (`OnFillInventoryObjectContextMenu`) run frequently and may be invoked:
+- multiple times per right-click
+- with duplicated item references
+- even when no menu is ultimately shown
+
+**Implications**
+- Logging here must be cheap or a no-op
+- Heavy computation must be gated early
+- Eligibility checks must be fast and side-effect free
+
+**Rule:** Treat context menu code as performance-critical and idempotent.
+
+---
+
+## 33. “Eligibility” ≠ “Safety” ≠ “Execution”
+
+A critical architectural distinction emerged:
+
+- **Eligibility** determines whether an action appears in the UI
+- **Safety** determines whether an action may run without violating invariants
+- **Execution** performs inventory mutation
+
+The same rules must often be enforced at multiple layers.
+
+**Lesson:** Redundant validation across layers is not waste — it is desync insurance, especially in multiplayer.
+
+---
+
+## 34. Never Trust a Single “Source of Truth” in Build 41
+
+Repeated failures came from assuming:
+- item scripts are authoritative
+- base hunger values are stable
+- engine setters preserve invariants
+- getters reflect definitions
+
+All of these assumptions failed at different times.
+
+**Rule:** In Build 41, truth is local and temporal. Validate invariants at the point of use.
+
+---
+
+## 35. Float Drift Is Harmless — Logic Drift Is Not
+
+Floating-point noise such as:
+```
+0.29999998211860657
+```
+is normal and expected.
+
+Actual bugs came from:
+- mixing absolute and base-relative math
+- switching semantics mid-pipeline
+- compensating for engine behavior instead of modeling it
+
+**Lesson:** Do not “fix” float noise. Fix semantic mismatches.
+
+---
+
+## 36. Thrash Is a Signal, Not a Failure
+
+A prolonged period of “debugging debugging” occurred when fixes began undoing each other.
+
+Progress resumed only after:
+- stopping implementation
+- writing the spec
+- enumerating invariants
+- locking scope
+
+**Lesson:** When fixes start canceling each other out, stop coding and formalize the model.
+
+
+### Consequence
+
+Systems that rely on **fraction math** (e.g. consolidation eligibility):
+
+```
+fraction = abs(current HungerChange) / abs(BaseHunger)
+```
+
+may silently fail if `BaseHunger` has been zeroed by runtime behavior.
+
+This manifests as:
+- partial items being rejected as “ineligible”
+- consolidation menus not appearing
+- merged results with zero hunger or empty stats
+
+### Verified Diagnostic Approach
+
+The correct way to reason about this class of bugs is:
+
+1. **Do not assume item scripts reflect runtime state**
+2. Log engine getters (`getBaseHunger`, `getHungChange`) at the moment of use
+3. Treat eligibility failures as data‑state problems first, not logic bugs
+4. Add targeted, gated debug at invariant boundaries
+
+### Design Guidance
+
+- Treat `BaseHunger` as a **runtime invariant**, not just a static definition
+- Preparation actions that manually mutate hunger **must explicitly reassert base values**
+- Consolidation logic should refuse to proceed when invariants are violated, and log why
+
+This lesson generalizes beyond food:
+> Any system that depends on a “base value” should verify that base at runtime, not trust definitions alone.
+
+---
