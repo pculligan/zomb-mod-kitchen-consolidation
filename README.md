@@ -121,7 +121,7 @@ If behavior and code ever diverge, the spec should be updated first.
 Eligibility is always data‑driven.
 
 Examples:
-- `KitchenConsolidation_Meats.lua`
+- `Meats.lua`
   - `Meats.SOURCES` → which raw meats can be prepared
   - `Meats.BYPRODUCT_ON_EMPTY` → containerized meats (e.g. canned ham → empty can)
 
@@ -144,6 +144,10 @@ Remove later with:
 
 ```bash
 ./scripts/dev-symlink.sh remove ~/Zomboid/mods/kitchenconsolidation
+```
+
+```
+source .venv/bin/activate
 ```
 
 ### Testing notes

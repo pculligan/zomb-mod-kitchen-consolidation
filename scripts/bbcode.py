@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-md_to_bbcode.py
+bbcode.py
 
 Convert a Markdown file to Steam-compatible BBCode.
 
 Usage:
-  python md_to_bbcode.py <source.md> <destination.bbcode>
+  python bbcode.py <source.md> <destination.bbcode>
 
 Notes:
 - Focuses on common Markdown used in Workshop descriptions

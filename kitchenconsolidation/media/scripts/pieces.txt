@@ -1,0 +1,1244 @@
+module KitchenConsolidation
+{
+    imports
+    {
+        Base,
+    }
+
+    item AvocadoPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.AvocadoPieces,
+        Icon               = Avocado,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -15,
+        BaseHunger         = -15,
+        ThirstChange       = -7,
+
+        // Weight / encumbrance
+        Weight             = 0.3,
+        WeightFull         = 0.3,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 6,
+        DaysTotallyRotten  = 14,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:16;Stew:16;Salad:8;Stir fry:8;Stir fry Griddle Pan:8;Sandwich:8;Sandwich Baguette:8;Pie:15;RicePot:15;RicePan:15;PastaPot:15;PastaPan:15;Taco:15;Burrito:15;Omelette:15;Pizza:15,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopAvocadoPieces
+    {
+        Base.Avocado;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.AvocadoPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineAvocadoPieces
+    {
+        KitchenConsolidation.AvocadoPieces;2,
+        Result : KitchenConsolidation.AvocadoPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item BellPepperPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.BellPepperPieces,
+        Icon               = BellPepper,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -8,
+        BaseHunger         = -8,
+        ThirstChange       = -2,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:8;Stew:8;Salad:8;Stir fry:8;Stir fry Griddle Pan:8;Roasted Vegetables:8;Sandwich:8;Sandwich Baguette:8;Burger:8;Pie:8;RicePot:8;RicePan:8;PastaPot:8;PastaPan:8;Taco:8;Burrito:8;Omelette:8;Pizza:8,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopBellPepperPieces
+    {
+        Base.BellPepper;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.BellPepperPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineBellPepperPieces
+    {
+        KitchenConsolidation.BellPepperPieces;2,
+        Result : KitchenConsolidation.BellPepperPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item BroccoliPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.BroccoliPieces,
+        Icon               = Broccoli,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -9,
+        BaseHunger         = -9,
+        ThirstChange       = -4,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 4,
+        DaysTotallyRotten  = 6,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:9;Stew:9;Salad:9;Stir fry:9;Stir fry Griddle Pan:9;Roasted Vegetables:9;Sandwich:9;Sandwich Baguette:9;Burger:9;Pie:9;RicePot:9;RicePan:9;PastaPot:9;PastaPan:9;Taco:9;Burrito:9;Omelette:9;Pizza:9,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopBroccoliPieces
+    {
+        Base.Broccoli;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.BroccoliPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineBroccoliPieces
+    {
+        KitchenConsolidation.BroccoliPieces;2,
+        Result : KitchenConsolidation.BroccoliPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item CabbagePieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.CabbagePieces,
+        Icon               = Cabbage,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -25,
+        BaseHunger         = -25,
+        ThirstChange       = -15,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 2,
+        DaysTotallyRotten  = 4,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:12;Stew:12;Salad:12;Stir fry:12;Stir fry Griddle Pan:12;Sandwich:6;Sandwich Baguette:6;Burger:6;Pie:6;Taco:6;Burrito:6,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopCabbagePieces
+    {
+        farming.Cabbage;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.CabbagePieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineCabbagePieces
+    {
+        KitchenConsolidation.CabbagePieces;2,
+        Result : KitchenConsolidation.CabbagePieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item CarrotPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.CarrotPieces,
+        Icon               = Carrots,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -8,
+        BaseHunger         = -8,
+        ThirstChange       = -4,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 6,
+        DaysTotallyRotten  = 8,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:8;Stew:8;Salad:8;Stir fry:8;Stir fry Griddle Pan:8;Roasted Vegetables:8;Sandwich:8;Sandwich Baguette:8;Pie:8;RicePot:8;RicePan:8;PastaPot:8;PastaPan:8,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopCarrotPieces
+    {
+        Base.Carrots;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.CarrotPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineCarrotPieces
+    {
+        KitchenConsolidation.CarrotPieces;2,
+        Result : KitchenConsolidation.CarrotPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item CornPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.CornPieces,
+        Icon               = Corn,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -14,
+        BaseHunger         = -14,
+        ThirstChange       = -4,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:14;Stew:14;Salad:7;Stir fry:14;Stir fry Griddle Pan:14;Roasted Vegetables:14;Burger:14;Pie:14;RicePot:14;RicePan:14;PastaPot:14;PastaPan:14;Taco:7;Burrito:7,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopCornPieces
+    {
+        Base.Corn;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.CornPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineCornPieces
+    {
+        KitchenConsolidation.CornPieces;2,
+        Result : KitchenConsolidation.CornPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item DaikonPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.DaikonPieces,
+        Icon               = Daikon,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -12,
+        BaseHunger         = -12,
+        ThirstChange       = -5,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:6;Stew:12;Salad:4;Stir fry:12;Stir fry Griddle Pan:12;Roasted Vegetables:12;Pie:12;RicePot:12;RicePan:12;PastaPot:12;PastaPan:12,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopDaikonPieces
+    {
+        Base.Daikon;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.DaikonPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineDaikonPieces
+    {
+        KitchenConsolidation.DaikonPieces;2,
+        Result : KitchenConsolidation.DaikonPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item EggplantPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.EggplantPieces,
+        Icon               = EggPlant,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -16,
+        BaseHunger         = -16,
+        ThirstChange       = -9,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:16;Stew:16;Salad:8;Stir fry:16;Stir fry Griddle Pan:16;Roasted Vegetables:16;Sandwich:4;Sandwich Baguette:4;Burger:8;Pie:16;RicePot:16;RicePan:16;PastaPot:16;PastaPan:16;Omelette:8;Pizza:8,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopEggplantPieces
+    {
+        Base.Eggplant;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.EggplantPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineEggplantPieces
+    {
+        KitchenConsolidation.EggplantPieces;2,
+        Result : KitchenConsolidation.EggplantPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item FishPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.FishPieces,
+        Icon               = MincedMeat,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -25,
+        BaseHunger         = -25,
+        ThirstChange       = 0,
+
+        // Nutrition (base-hunger–scaled; conservative)
+        Calories           = 210,
+        Proteins           = 25,
+        Lipids             = 10,
+        Carbohydrates      = 0,
+
+        // Weight / encumbrance
+        Weight             = 0.3,
+        WeightFull         = 0.3,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 2,
+        DaysTotallyRotten  = 5,
+
+        // Eating effects
+        BoredomChange      = 10,
+        UnhappyChange      = 10,
+
+        // Cooking / ingredient metadata
+        FoodType           = Meat,
+        Tags               = Fish;Prepared;Ingredient;KitchenConsolidation.Pieces,
+        EvolvedRecipe      = Soup:15;Stew:15;Salad:10;Stir fry:15;Stir fry Griddle Pan:15;Roasted Vegetables:15;Sandwich:5;Sandwich Baguette:5;Burger:10;Pie:15;RicePot:15;RicePan:15;PastaPot:15;PastaPan:15;Taco:10;Burrito:15;Pizza:15,
+        DangerousUncooked  = true,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopFishPieces
+    {
+        [Recipe.GetItemTypes.KitchenConsolidation_FishPiecesSources];1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.FishPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineFishPieces
+    {
+        KitchenConsolidation.FishPieces;2,
+        Result : KitchenConsolidation.FishPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item LeekPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.LeekPieces,
+        Icon               = Leek,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -12,
+        BaseHunger         = -12,
+        ThirstChange       = -5,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:12;Stew:12;Salad:6;Stir fry:12;Stir fry Griddle Pan:12;Pie:12;RicePot:12;RicePan:12;PastaPot:12;PastaPan:12;Omelette:6,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopLeekPieces
+    {
+        Base.Leek;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.LeekPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineLeekPieces
+    {
+        KitchenConsolidation.LeekPieces;2,
+        Result : KitchenConsolidation.LeekPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item MeatPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.MeatPieces,
+        Icon               = MincedMeat,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -23,
+        BaseHunger         = -23,
+        ThirstChange       = 0,
+
+        // Nutrition (base-hunger–scaled; conservative)
+        Calories           = 300,
+        Proteins           = 30,
+        Lipids             = 12,
+        Carbohydrates      = 0,
+
+        // Weight / encumbrance
+        Weight             = 0.3,
+        WeightFull         = 0.3,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 2,
+        DaysTotallyRotten  = 5,
+
+        // Eating effects
+        BoredomChange      = 10,
+        UnhappyChange      = 10,
+
+        // Cooking / ingredient metadata
+        FoodType           = Meat,
+        Tags               = Meat;Prepared;Ingredient;KitchenConsolidation.Pieces,
+        EvolvedRecipe      = Soup:20;Stew:20;Salad:10;Stir fry:10;Stir fry Griddle Pan:10;Burger:20;Pie:10;RicePot:20;RicePan:20;PastaPot:20;PastaPan:20;Taco:10;Burrito:10;Omelette:10;Pizza:20,
+        DangerousUncooked  = true,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopMeatPieces
+    {
+        [Recipe.GetItemTypes.KitchenConsolidation_MeatPiecesSources];1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.MeatPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineMeatPieces
+    {
+        KitchenConsolidation.MeatPieces;2,
+        Result : KitchenConsolidation.MeatPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item MushroomPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.MushroomPieces,
+        Icon               = MushroomGeneric1,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -13,
+        BaseHunger         = -13,
+        ThirstChange       = -1,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 3,
+        DaysTotallyRotten  = 4,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:13;Stew:13;Salad:13;Stir fry:13;Stir fry Griddle Pan:13;Roasted Vegetables:13;Sandwich:13;Sandwich Baguette:13;Burger:13;Pie:13;RicePot:13;RicePan:13;PastaPot:13;PastaPan:13;Omelette:6;Pizza:13,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopMushroomPieces
+    {
+        Base.MushroomGeneric1/Base.MushroomGeneric2/Base.MushroomGeneric3/Base.MushroomGeneric4/Base.MushroomGeneric5/Base.MushroomGeneric6/Base.MushroomGeneric7;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.MushroomPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineMushroomPieces
+    {
+        KitchenConsolidation.MushroomPieces;2,
+        Result : KitchenConsolidation.MushroomPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item OnionPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.OnionPieces,
+        Icon               = Onion,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -10,
+        BaseHunger         = -10,
+        ThirstChange       = -,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 7,
+        DaysTotallyRotten  = 9,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:5;Stew:5;Salad:2;Stir fry:2;Stir fry Griddle Pan:2;Sandwich:2;Sandwich Baguette:2;Burger:2;Pie:5;RicePot:5;RicePan:5;PastaPot:5;PastaPan:5;Taco:2;Burrito:2;Omelette:2;Pizza:5,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopOnionPieces
+    {
+        Base.Onion;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.OnionPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineOnionPieces
+    {
+        KitchenConsolidation.OnionPieces;2,
+        Result : KitchenConsolidation.OnionPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item PepperHabaneroPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.PepperHabaneroPieces,
+        Icon               = PepperHabanero,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -2,
+        BaseHunger         = -2,
+        ThirstChange       = -,
+
+        // Weight / encumbrance
+        Weight             = 0.1,
+        WeightFull         = 0.1,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:2;Stew:2;Salad:1;Stir fry:2;Stir fry Griddle Pan:2;Roasted Vegetables:2;Sandwich:1;Sandwich Baguette:1;Burger:1;RicePot:2;RicePan:2;PastaPot:2;PastaPan:2;Taco:1;Burrito:1;Omelette:1;Pizza:2,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopPepperHabaneroPieces
+    {
+        Base.PepperHabanero;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.PepperHabaneroPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombinePepperHabaneroPieces
+    {
+        KitchenConsolidation.PepperHabaneroPieces;2,
+        Result : KitchenConsolidation.PepperHabaneroPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item PepperJalapenoPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.PepperJalapenoPieces,
+        Icon               = PepperJalapeno,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -2,
+        BaseHunger         = -2,
+        ThirstChange       = -,
+
+        // Weight / encumbrance
+        Weight             = 0.1,
+        WeightFull         = 0.1,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 5,
+        DaysTotallyRotten  = 8,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:2;Stew:2;Salad:1;Stir fry:2;Stir fry Griddle Pan:2;Roasted Vegetables:2;Sandwich:1;Sandwich Baguette:1;Burger:1;RicePot:2;RicePan:2;PastaPot:2;PastaPan:2;Taco:1;Burrito:1;Omelette:1;Pizza:2,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopPepperJalapenoPieces
+    {
+        Base.PepperJalapeno;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.PepperJalapenoPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombinePepperJalapenoPieces
+    {
+        KitchenConsolidation.PepperJalapenoPieces;2,
+        Result : KitchenConsolidation.PepperJalapenoPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item PotatoPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.PotatoPieces,
+        Icon               = Potato,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -18,
+        BaseHunger         = -18,
+        ThirstChange       = -7,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 14,
+        DaysTotallyRotten  = 28,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:18;Stew:18;Salad:18;Stir fry:18;Stir fry Griddle Pan:18;Roasted Vegetables:18;Pie:18;Omelette:18,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopPotatoPieces
+    {
+        farming.Potato/filcher.SFPotatoSliced;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.PotatoPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombinePotatoPieces
+    {
+        KitchenConsolidation.PotatoPieces;2,
+        Result : KitchenConsolidation.PotatoPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item RedRadishPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.RedRadishPieces,
+        Icon               = RedRadish,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -3,
+        BaseHunger         = -3,
+        ThirstChange       = -1,
+
+        // Weight / encumbrance
+        Weight             = 0.1,
+        WeightFull         = 0.1,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 3,
+        DaysTotallyRotten  = 7,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:3;Stew:3;Salad:1;Stir fry:1;Stir fry Griddle Pan:1;Sandwich:3;Sandwich Baguette:3;Burger:3,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopRedRadishPieces
+    {
+        farming.RedRadish;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.RedRadishPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineRedRadishPieces
+    {
+        KitchenConsolidation.RedRadishPieces;2,
+        Result : KitchenConsolidation.RedRadishPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item SeaweedPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.SeaweedPieces,
+        Icon               = Seaweed,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -3,
+        BaseHunger         = -3,
+        ThirstChange       = -,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:3,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopSeaweedPieces
+    {
+        Base.Seaweed;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.SeaweedPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineSeaweedPieces
+    {
+        KitchenConsolidation.SeaweedPieces;2,
+        Result : KitchenConsolidation.SeaweedPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item TofuPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.TofuPieces,
+        Icon               = Tofu,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -10,
+        BaseHunger         = -10,
+        ThirstChange       = -10,
+
+        // Weight / encumbrance
+        Weight             = 0.3,
+        WeightFull         = 0.3,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 6,
+        DaysTotallyRotten  = 14,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:10;Stew:10;Salad:10;Stir fry:10;Stir fry Griddle Pan:10;Burger:10;RicePot:10;RicePan:10;PastaPot:10;PastaPan:10;Taco:5;Burrito:10;Pizza:10,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopTofuPieces
+    {
+        Base.Tofu;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.TofuPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineTofuPieces
+    {
+        KitchenConsolidation.TofuPieces;2,
+        Result : KitchenConsolidation.TofuPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item TomatoPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.TomatoPieces,
+        Icon               = Tomato,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -12,
+        BaseHunger         = -12,
+        ThirstChange       = -15,
+
+        // Weight / encumbrance
+        Weight             = 0.2,
+        WeightFull         = 0.2,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 4,
+        DaysTotallyRotten  = 12,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:12;Stew:12;Salad:6;Stir fry:6;Stir fry Griddle Pan:6;Sandwich:6;Sandwich Baguette:6;Burger:6;Pie:6;RicePot:12;RicePan:12;PastaPot:12;PastaPan:12;Taco:6;Burrito:6;Omelette:6;Pizza:12,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopTomatoPieces
+    {
+        farming.Tomato;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.TomatoPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineTomatoPieces
+    {
+        KitchenConsolidation.TomatoPieces;2,
+        Result : KitchenConsolidation.TomatoPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    item ZucchiniPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.ZucchiniPieces,
+        Icon               = Zucchini,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        // Core consumption semantics (fungible pile)
+        HungerChange       = -10,
+        BaseHunger         = -10,
+        ThirstChange       = -10,
+
+        // Weight / encumbrance
+        Weight             = 0.3,
+        WeightFull         = 0.3,
+        WeightEmpty        = 0,
+
+        // Freshness / spoilage
+        DaysFresh          = 6,
+        DaysTotallyRotten  = 14,
+
+        // Cooking / ingredient metadata
+        FoodType           = Vegetable,
+        Tags               = Prepared;Vegetable;Ingredient,
+        EvolvedRecipe      = Soup:10;Stew:10;Salad:10;Stir fry:10;Stir fry Griddle Pan:10;Pie:5;RicePot:10;RicePan:10;PastaPot:10;PastaPan:10;Omelette:5;Pizza:10,
+
+        // General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopZucchiniPieces
+    {
+        Base.Zucchini;1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.ZucchiniPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnGiveXP    : Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineZucchiniPieces
+    {
+        KitchenConsolidation.ZucchiniPieces;2,
+        Result : KitchenConsolidation.ZucchiniPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk    		: false,
+        NeedToBeLearn 		: false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+}

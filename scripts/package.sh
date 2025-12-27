@@ -22,7 +22,7 @@ Usage:
 Arguments:
   modid                 Mod ID / folder name (e.g. kitchenconsolidation)
   repo_root             Root of the mod repository
-  zomboid_workshop_root Typically ~/Zomboid/workshop
+  zomboid_workshop_root Typically ~/Zomboid/Workshop
 
 The script creates:
   <zomboid_workshop_root>/<modid>/
@@ -50,8 +50,8 @@ repo_root="$(cd "$repo_root" && pwd)"
 workshop_root="$(cd "$workshop_root" && pwd)"
 
 src_mod="${repo_root}/${modid}"
-dst_root="${workshop_root}/${modid}"
-dst_contents="${dst_root}/Contents/mods/${modid}"
+dst_root="${workshop_root}"
+dst_contents="${dst_root}/${modid}/Contents/mods/${modid}"
 
 # --- Validate inputs ---
 [[ -f "${src_mod}/mod.info" ]] || die "mod.info not found in repo root"
@@ -77,11 +77,11 @@ rsync -av \
   "${dst_contents}/"
 
 # --- Copy workshop metadata ---
-cp "${src_mod}/poster.png" "${dst_root}/preview.png"
+cp "${src_mod}/poster.png" "${dst_root}/${modid}/preview.png"
 cp "${repo_root}/workshop/description.bbcode" "${dst_root}/workshop.txt"
 
 # --- Remove macOS junk ---
-find "${dst_root}/${modid}/Contents" -name ".DS_Store" -delete
+find "${dst_root}/${modid}/Contents/" -name ".DS_Store" -delete
 
 
 echo "Workshop package assembled at:"

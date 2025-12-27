@@ -1,0 +1,132 @@
+
+function Recipe.GetItemTypes.KitchenConsolidation_ContainerizedCan(scriptItems)
+    -- Tin can byproducts
+
+    -- Vanilla
+    KC_AddItem(scriptItems, "Base.OpenBeans")
+    KC_AddItem(scriptItems, "Base.CannedCarrotsOpen")
+    KC_AddItem(scriptItems, "Base.CannedChiliOpen")
+    KC_AddItem(scriptItems, "Base.CannedCornOpen")
+    KC_AddItem(scriptItems, "Base.CannedCornedBeefOpen")
+    KC_AddItem(scriptItems, "Base.DogfoodOpen")
+    KC_AddItem(scriptItems, "Base.CannedMilkOpen")
+    KC_AddItem(scriptItems, "Base.CannedFruitBeverageOpen")
+    KC_AddItem(scriptItems, "Base.CannedFruitCocktailOpen")
+    KC_AddItem(scriptItems, "Base.CannedMushroomSoupOpen")
+    KC_AddItem(scriptItems, "Base.CannedPeachesOpen")
+    KC_AddItem(scriptItems, "Base.CannedPeasOpen")
+    KC_AddItem(scriptItems, "Base.CannedPineappleOpen")
+    KC_AddItem(scriptItems, "Base.CannedPotatoOpen")
+    KC_AddItem(scriptItems, "Base.CannedSardinesOpen")
+    KC_AddItem(scriptItems, "Base.CannedBologneseOpen")
+    KC_AddItem(scriptItems, "Base.CannedTomatoOpen")
+    KC_AddItem(scriptItems, "Base.TunaTinOpen")
+    KC_AddItem(scriptItems, "Base.TinnedSoupOpen")
+
+    -- CookingTime
+    KC_AddItem(scriptItems, "filcher.CannedHamOpen")
+    KC_AddItem(scriptItems, "filcher.CannedSoupOpen")
+    KC_AddItem(scriptItems, "filcher.OpenCannedSpagetti")
+    KC_AddItem(scriptItems, "filcher.OpenCannedSpinach")
+    KC_AddItem(scriptItems, "filcher.SFCatfoodOpen")
+end
+
+function Recipe.GetItemTypes.KitchenConsolidation_ContainerizedJar(scriptItems)
+    -- Jar byproducts
+
+    -- Vanilla
+    KC_AddItem(scriptItems, "Base.CannedBellPepper_Open")
+    KC_AddItem(scriptItems, "Base.CannedBroccoli_Open")
+    KC_AddItem(scriptItems, "Base.CannedCabbage_Open")
+    KC_AddItem(scriptItems, "Base.CannedCarrots_Open")
+    KC_AddItem(scriptItems, "Base.CannedEggplant_Open")
+    KC_AddItem(scriptItems, "Base.CannedLeek_Open")
+    KC_AddItem(scriptItems, "Base.CannedPotato_Open")
+    KC_AddItem(scriptItems, "Base.CannedRedRadish_Open")
+    KC_AddItem(scriptItems, "Base.CannedTomato_Open")
+    KC_AddItem(scriptItems, "Base.CannedRoe_Open")
+
+    -- CookingTime
+    KC_AddItem(scriptItems, "filcher.SFChocolateWaferSticksJarOpen")
+    KC_AddItem(scriptItems, "filcher.SFPickles")
+    KC_AddItem(scriptItems, "filcher.SFJelly")
+    KC_AddItem(scriptItems, "filcher.SFTomatoSauce")
+end
+
+function Recipe.GetItemTypes.KitchenConsolidation_ContainerizedBottle(scriptItems)
+    -- Bottle byproducts
+
+    KC_AddItem(scriptItems, "Base.OilOlive")
+    KC_AddItem(scriptItems, "Base.OilVegetable")
+    KC_AddItem(scriptItems, "Base.SesameOil")
+    KC_AddItem(scriptItems, "Base.Vinegar")
+    KC_AddItem(scriptItems, "Base.RiceVinegar")
+end
+
+function Recipe.GetItemTypes.KitchenConsolidation_ContainerizedNone(scriptItems)
+    -- Containerized foods with no returned container
+
+    -- Vanilla
+    KC_AddItem(scriptItems, "Base.Flour2")
+    KC_AddItem(scriptItems, "Base.Cornmeal2")
+    KC_AddItem(scriptItems, "Base.Cornflour2")
+    KC_AddItem(scriptItems, "Base.Blackbeans")
+    KC_AddItem(scriptItems, "Base.DriedBlackBeans")
+    KC_AddItem(scriptItems, "Base.DriedChickpeas")
+    KC_AddItem(scriptItems, "Base.DriedKidneyBeans")
+    KC_AddItem(scriptItems, "Base.DriedLentils")
+    KC_AddItem(scriptItems, "Base.DriedSplitPeas")
+    KC_AddItem(scriptItems, "Base.DriedWhiteBeans")
+    KC_AddItem(scriptItems, "Base.SoybeansSeed")
+    KC_AddItem(scriptItems, "Base.Soybeans")
+    KC_AddItem(scriptItems, "Base.Salt")
+    KC_AddItem(scriptItems, "Base.SeasoningSalt")
+    KC_AddItem(scriptItems, "Base.Sugar")
+    KC_AddItem(scriptItems, "Base.SugarBrown")
+    KC_AddItem(scriptItems, "Base.SugarPacket")
+    KC_AddItem(scriptItems, "Base.SugarCubes")
+    KC_AddItem(scriptItems, "Base.Honey")
+    KC_AddItem(scriptItems, "Base.MapleSyrup")
+    KC_AddItem(scriptItems, "Base.PowderedGarlic")
+    KC_AddItem(scriptItems, "Base.PowderedOnion")
+    KC_AddItem(scriptItems, "Base.Pepper")
+    KC_AddItem(scriptItems, "Base.CornFrozen")
+    KC_AddItem(scriptItems, "Base.Peas")
+    KC_AddItem(scriptItems, "Base.MixedVegetables")
+    KC_AddItem(scriptItems, "Base.Seasoning_Basil")
+    KC_AddItem(scriptItems, "Base.Seasoning_Chives")
+    KC_AddItem(scriptItems, "Base.Seasoning_Cilantro")
+    KC_AddItem(scriptItems, "Base.Seasoning_Oregano")
+    KC_AddItem(scriptItems, "Base.Seasoning_Parsley")
+    KC_AddItem(scriptItems, "Base.Seasoning_Rosemary")
+    KC_AddItem(scriptItems, "Base.Seasoning_Sage")
+    KC_AddItem(scriptItems, "Base.Seasoning_Thyme")
+    KC_AddItem(scriptItems, "Base.OatsRaw")
+    KC_AddItem(scriptItems, "Base.Cereal")
+    KC_AddItem(scriptItems, "Base.CocoaPowder")
+    KC_AddItem(scriptItems, "Base.Coffee2")
+    KC_AddItem(scriptItems, "Base.JamFruit")
+    KC_AddItem(scriptItems, "Base.PeanutButter")
+    KC_AddItem(scriptItems, "Base.TortillaChips")
+    KC_AddItem(scriptItems, "Base.Crisps")
+    KC_AddItem(scriptItems, "Base.Crisps2")
+    KC_AddItem(scriptItems, "Base.Crisps3")
+    KC_AddItem(scriptItems, "Base.Crisps4")
+    KC_AddItem(scriptItems, "Base.CatFoodBag")
+    KC_AddItem(scriptItems, "Base.DogFoodBag")
+    KC_AddItem(scriptItems, "Base.Ramen")
+    KC_AddItem(scriptItems, "Base.Macaroni")
+    KC_AddItem(scriptItems, "Base.Pasta")
+    KC_AddItem(scriptItems, "Base.Rice")
+    KC_AddItem(scriptItems, "Base.TomatoPaste")
+
+    -- CookingTime
+    KC_AddItem(scriptItems, "filcher.Macaroni")
+    --KC_AddItem(scriptItems, "filcher.SFPotatoSliced")
+    KC_AddItem(scriptItems, "filcher.SFBeans")
+    KC_AddItem(scriptItems, "filcher.BreadPieces")
+    KC_AddItem(scriptItems, "filcher.SFHazelnutCream")
+    KC_AddItem(scriptItems, "filcher.Cinnamon")
+    KC_AddItem(scriptItems, "filcher.SFPaprika")
+    KC_AddItem(scriptItems, "filcher.SFCurry")
+end

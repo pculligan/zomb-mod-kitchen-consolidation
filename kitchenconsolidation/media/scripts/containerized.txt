@@ -1,0 +1,1334 @@
+module KitchenConsolidation
+{
+    imports
+    {
+        Base,
+    }
+
+    recipe CombineBlackbeans
+    {
+        Base.Blackbeans;2,
+        Result : Base.Blackbeans=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedBellPepper_Open
+    {
+        Base.CannedBellPepper_Open;2,
+        Result : Base.CannedBellPepper_Open=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedBologneseOpen
+    {
+        Base.CannedBologneseOpen;2,
+        Result : Base.CannedBologneseOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedBroccoli_Open
+    {
+        Base.CannedBroccoli_Open;2,
+        Result : Base.CannedBroccoli_Open=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedCabbage_Open
+    {
+        Base.CannedCabbage_Open;2,
+        Result : Base.CannedCabbage_Open=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedCarrots_Open
+    {
+        Base.CannedCarrots_Open;2,
+        Result : Base.CannedCarrots_Open=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedCarrotsOpen
+    {
+        Base.CannedCarrotsOpen;2,
+        Result : Base.CannedCarrotsOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedChiliOpen
+    {
+        Base.CannedChiliOpen;2,
+        Result : Base.CannedChiliOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedCornedBeefOpen
+    {
+        Base.CannedCornedBeefOpen;2,
+        Result : Base.CannedCornedBeefOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedCornOpen
+    {
+        Base.CannedCornOpen;2,
+        Result : Base.CannedCornOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedEggplant_Open
+    {
+        Base.CannedEggplant_Open;2,
+        Result : Base.CannedEggplant_Open=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedFruitBeverageOpen
+    {
+        Base.CannedFruitBeverageOpen;2,
+        Result : Base.CannedFruitBeverageOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedFruitCocktailOpen
+    {
+        Base.CannedFruitCocktailOpen;2,
+        Result : Base.CannedFruitCocktailOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedLeek_Open
+    {
+        Base.CannedLeek_Open;2,
+        Result : Base.CannedLeek_Open=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedMilkOpen
+    {
+        Base.CannedMilkOpen;2,
+        Result : Base.CannedMilkOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedMushroomSoupOpen
+    {
+        Base.CannedMushroomSoupOpen;2,
+        Result : Base.CannedMushroomSoupOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedPeachesOpen
+    {
+        Base.CannedPeachesOpen;2,
+        Result : Base.CannedPeachesOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedPeasOpen
+    {
+        Base.CannedPeasOpen;2,
+        Result : Base.CannedPeasOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedPineappleOpen
+    {
+        Base.CannedPineappleOpen;2,
+        Result : Base.CannedPineappleOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedPotato_Open
+    {
+        Base.CannedPotato_Open;2,
+        Result : Base.CannedPotato_Open=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedPotatoOpen
+    {
+        Base.CannedPotatoOpen;2,
+        Result : Base.CannedPotatoOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedRedRadish_Open
+    {
+        Base.CannedRedRadish_Open;2,
+        Result : Base.CannedRedRadish_Open=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedRoe_Open
+    {
+        Base.CannedRoe_Open;2,
+        Result : Base.CannedRoe_Open=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedSardinesOpen
+    {
+        Base.CannedSardinesOpen;2,
+        Result : Base.CannedSardinesOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedTomato_Open
+    {
+        Base.CannedTomato_Open;2,
+        Result : Base.CannedTomato_Open=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedTomatoOpen
+    {
+        Base.CannedTomatoOpen;2,
+        Result : Base.CannedTomatoOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCatFoodBag
+    {
+        Base.CatFoodBag;2,
+        Result : Base.CatFoodBag=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCereal
+    {
+        Base.Cereal;2,
+        Result : Base.Cereal=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCocoaPowder
+    {
+        Base.CocoaPowder;2,
+        Result : Base.CocoaPowder=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCoffee2
+    {
+        Base.Coffee2;2,
+        Result : Base.Coffee2=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCornflour2
+    {
+        Base.Cornflour2;2,
+        Result : Base.Cornflour2=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCornFrozen
+    {
+        Base.CornFrozen;2,
+        Result : Base.CornFrozen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCornmeal2
+    {
+        Base.Cornmeal2;2,
+        Result : Base.Cornmeal2=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCrisps
+    {
+        Base.Crisps;2,
+        Result : Base.Crisps=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCrisps2
+    {
+        Base.Crisps2;2,
+        Result : Base.Crisps2=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCrisps3
+    {
+        Base.Crisps3;2,
+        Result : Base.Crisps3=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCrisps4
+    {
+        Base.Crisps4;2,
+        Result : Base.Crisps4=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineDogFoodBag
+    {
+        Base.DogFoodBag;2,
+        Result : Base.DogFoodBag=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineDogfoodOpen
+    {
+        Base.DogfoodOpen;2,
+        Result : Base.DogfoodOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineDriedBlackBeans
+    {
+        Base.DriedBlackBeans;2,
+        Result : Base.DriedBlackBeans=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineDriedChickpeas
+    {
+        Base.DriedChickpeas;2,
+        Result : Base.DriedChickpeas=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineDriedKidneyBeans
+    {
+        Base.DriedKidneyBeans;2,
+        Result : Base.DriedKidneyBeans=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineDriedLentils
+    {
+        Base.DriedLentils;2,
+        Result : Base.DriedLentils=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineDriedSplitPeas
+    {
+        Base.DriedSplitPeas;2,
+        Result : Base.DriedSplitPeas=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineDriedWhiteBeans
+    {
+        Base.DriedWhiteBeans;2,
+        Result : Base.DriedWhiteBeans=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineFlour2
+    {
+        Base.Flour2;2,
+        Result : Base.Flour2=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineHoney
+    {
+        Base.Honey;2,
+        Result : Base.Honey=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineJamFruit
+    {
+        Base.JamFruit;2,
+        Result : Base.JamFruit=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineMacaroni
+    {
+        Base.Macaroni;2,
+        Result : Base.Macaroni=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineMapleSyrup
+    {
+        Base.MapleSyrup;2,
+        Result : Base.MapleSyrup=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineMixedVegetables
+    {
+        Base.MixedVegetables;2,
+        Result : Base.MixedVegetables=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineOatsRaw
+    {
+        Base.OatsRaw;2,
+        Result : Base.OatsRaw=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineOilOlive
+    {
+        Base.OilOlive;2,
+        Result : Base.OilOlive=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineOilVegetable
+    {
+        Base.OilVegetable;2,
+        Result : Base.OilVegetable=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineOpenBeans
+    {
+        Base.OpenBeans;2,
+        Result : Base.OpenBeans=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombinePasta
+    {
+        Base.Pasta;2,
+        Result : Base.Pasta=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombinePeanutButter
+    {
+        Base.PeanutButter;2,
+        Result : Base.PeanutButter=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombinePeas
+    {
+        Base.Peas;2,
+        Result : Base.Peas=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombinePepper
+    {
+        Base.Pepper;2,
+        Result : Base.Pepper=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombinePowderedGarlic
+    {
+        Base.PowderedGarlic;2,
+        Result : Base.PowderedGarlic=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombinePowderedOnion
+    {
+        Base.PowderedOnion;2,
+        Result : Base.PowderedOnion=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineRamen
+    {
+        Base.Ramen;2,
+        Result : Base.Ramen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineRice
+    {
+        Base.Rice;2,
+        Result : Base.Rice=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineRiceVinegar
+    {
+        Base.RiceVinegar;2,
+        Result : Base.RiceVinegar=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSalt
+    {
+        Base.Salt;2,
+        Result : Base.Salt=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSeasoning_Basil
+    {
+        Base.Seasoning_Basil;2,
+        Result : Base.Seasoning_Basil=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSeasoning_Chives
+    {
+        Base.Seasoning_Chives;2,
+        Result : Base.Seasoning_Chives=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSeasoning_Cilantro
+    {
+        Base.Seasoning_Cilantro;2,
+        Result : Base.Seasoning_Cilantro=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSeasoning_Oregano
+    {
+        Base.Seasoning_Oregano;2,
+        Result : Base.Seasoning_Oregano=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSeasoning_Parsley
+    {
+        Base.Seasoning_Parsley;2,
+        Result : Base.Seasoning_Parsley=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSeasoning_Rosemary
+    {
+        Base.Seasoning_Rosemary;2,
+        Result : Base.Seasoning_Rosemary=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSeasoning_Sage
+    {
+        Base.Seasoning_Sage;2,
+        Result : Base.Seasoning_Sage=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSeasoning_Thyme
+    {
+        Base.Seasoning_Thyme;2,
+        Result : Base.Seasoning_Thyme=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSeasoningSalt
+    {
+        Base.SeasoningSalt;2,
+        Result : Base.SeasoningSalt=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSesameOil
+    {
+        Base.SesameOil;2,
+        Result : Base.SesameOil=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSoybeans
+    {
+        Base.Soybeans;2,
+        Result : Base.Soybeans=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSoybeansSeed
+    {
+        Base.SoybeansSeed;2,
+        Result : Base.SoybeansSeed=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSugar
+    {
+        Base.Sugar;2,
+        Result : Base.Sugar=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSugarBrown
+    {
+        Base.SugarBrown;2,
+        Result : Base.SugarBrown=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSugarCubes
+    {
+        Base.SugarCubes;2,
+        Result : Base.SugarCubes=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSugarPacket
+    {
+        Base.SugarPacket;2,
+        Result : Base.SugarPacket=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineTinnedSoupOpen
+    {
+        Base.TinnedSoupOpen;2,
+        Result : Base.TinnedSoupOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineTomatoPaste
+    {
+        Base.TomatoPaste;2,
+        Result : Base.TomatoPaste=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineTortillaChips
+    {
+        Base.TortillaChips;2,
+        Result : Base.TortillaChips=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineTunaTinOpen
+    {
+        Base.TunaTinOpen;2,
+        Result : Base.TunaTinOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineVinegar
+    {
+        Base.Vinegar;2,
+        Result : Base.Vinegar=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineBreadPieces
+    {
+        filcher.BreadPieces;2,
+        Result : filcher.BreadPieces=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedHamOpen
+    {
+        filcher.CannedHamOpen;2,
+        Result : filcher.CannedHamOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCannedSoupOpen
+    {
+        filcher.CannedSoupOpen;2,
+        Result : filcher.CannedSoupOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineCinnamon
+    {
+        filcher.Cinnamon;2,
+        Result : filcher.Cinnamon=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineMacaroni
+    {
+        filcher.Macaroni;2,
+        Result : filcher.Macaroni=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineOpenCannedSpagetti
+    {
+        filcher.OpenCannedSpagetti;2,
+        Result : filcher.OpenCannedSpagetti=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineOpenCannedSpinach
+    {
+        filcher.OpenCannedSpinach;2,
+        Result : filcher.OpenCannedSpinach=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSFBeans
+    {
+        filcher.SFBeans;2,
+        Result : filcher.SFBeans=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSFCatfoodOpen
+    {
+        filcher.SFCatfoodOpen;2,
+        Result : filcher.SFCatfoodOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSFChocolateWaferSticksJarOpen
+    {
+        filcher.SFChocolateWaferSticksJarOpen;2,
+        Result : filcher.SFChocolateWaferSticksJarOpen=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSFCurry
+    {
+        filcher.SFCurry;2,
+        Result : filcher.SFCurry=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSFHazelnutCream
+    {
+        filcher.SFHazelnutCream;2,
+        Result : filcher.SFHazelnutCream=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSFJelly
+    {
+        filcher.SFJelly;2,
+        Result : filcher.SFJelly=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSFPaprika
+    {
+        filcher.SFPaprika;2,
+        Result : filcher.SFPaprika=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSFPickles
+    {
+        filcher.SFPickles;2,
+        Result : filcher.SFPickles=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+    recipe CombineSFTomatoSauce
+    {
+        filcher.SFTomatoSauce;2,
+        Result : filcher.SFTomatoSauce=1,
+        Time : 50,
+        Category : Cooking,
+        CanBeDoneFromFloor : true,
+        StopOnWalk        : false,
+        NeedToBeLearn     : false,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+}

@@ -1,0 +1,74 @@
+module KitchenConsolidation
+{
+    imports
+	{
+		Base,
+	}	
+	
+    item FishPieces
+    {
+        DisplayName        = ItemName_KitchenConsolidation.FishPieces,
+        Icon               = MincedMeat,
+        DisplayCategory    = Food,
+        Type               = Food,
+
+        -- Core consumption semantics (fungible pile)
+        HungerChange       = -25,
+        BaseHunger         = -25,
+        ThirstChange       = 0,
+
+        -- Nutrition (base-hunger–scaled; conservative)
+        Calories           = 210,
+        Proteins           = 25,
+        Lipids             = 10,
+        Carbohydrates      = 0,
+
+        -- Weight / encumbrance
+        -- Weight scales with remaining quantity (hunger fraction)
+        Weight             = 0.3,
+        WeightFull         = 0.3,
+        WeightEmpty        = 0.0,
+
+        -- Freshness / spoilage (fish spoils quickly)
+        DaysFresh          = 2,
+        DaysTotallyRotten  = 5,
+
+        -- Eating directly is allowed but discouraged
+        BoredomChange      = 10,
+        UnhappyChange      = 10,
+
+        -- Cooking / ingredient metadata
+        FoodType           = Meat,
+        Tags               = Fish;Prepared;Ingredient;KitchenConsolidation.Pieces,
+        DangerousUncooked  = true,
+        EvolvedRecipe      = Soup:20;Stew:20,
+
+        -- General flags
+        IsCookable         = true,
+        CanStoreWater      = false,
+    }
+
+    recipe ChopFishPieces
+    {
+        [Recipe.GetItemTypes.FishMeat];1,
+        keep [Recipe.GetItemTypes.SharpKnife]/Base.MeatCleaver,
+        Result      : KitchenConsolidation.FishPieces=1,
+        Time        : 50,
+        Category    : Cooking,
+        CanBeDoneFromFloor : false,
+        OnGiveXP 	: Recipe.OnGiveXP.Cooking10,
+        OnCreate    : Recipe.OnCreate.KitchenConsolidation_Chop,
+    }
+
+    recipe CombineFishPieces
+    {
+        KitchenConsolidation.FishPieces;2,
+        Result : KitchenConsolidation.FishPieces=1,
+        Time : 50,
+        Category : Cooking,
+        OnCanPerform : Recipe.OnCanPerform.KitchenConsolidation_Combine_OnCanPerform,
+        OnCreate : Recipe.OnCreate.KitchenConsolidation_Combine_OnCreate,
+    }
+
+
+}

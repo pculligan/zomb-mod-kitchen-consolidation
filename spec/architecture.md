@@ -38,9 +38,9 @@ Responsibilities:
 - Do *not* encode consolidation logic
 
 Examples:
-- `kitchenconsolidation_fish.txt`
-- `kitchenconsolidation_meat.txt`
-- `kitchenconsolidation_vegetables.txt`
+- `fish.txt`
+- `meat.txt`
+- `vegetables.txt`
 
 Item scripts are treated as *static descriptors*, not sources of runtime truth.
 
@@ -76,8 +76,8 @@ media/lua/shared/
 ```
 
 Primary actions:
-- `KitchenConsolidation_PrepareAction.lua`
-- `KitchenConsolidation_ConsolidateAction.lua`
+- `PrepareAction.lua`
+- `ConsolidateAction.lua`
 
 Responsibilities:
 - Mutate inventory state
@@ -167,8 +167,8 @@ media/lua/client/
 ```
 
 Primary files:
-- `KitchenConsolidation_Prepare.lua`
-- `KitchenConsolidation_Consolidate.lua`
+- `Prepare.lua`
+- `Consolidate.lua`
 
 Responsibilities:
 - Hook into inventory context menus
@@ -262,3 +262,12 @@ Extensions must preserve:
 > **No layer infers or corrects the responsibilities of another layer.**
 
 Violations of this invariant should be treated as design defects.
+
+## Dev Setup
+```
+rm -rf .venv
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install openai
+```

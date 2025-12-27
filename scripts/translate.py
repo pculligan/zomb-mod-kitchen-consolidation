@@ -6,15 +6,15 @@ Generate Project Zomboid Build 41 localization files by translating the EN table
 with OpenAI, using a context-rich prompt.
 
 Inputs (expected):
-  media/lua/shared/Translate/EN/ContextMenu_EN.txt
-  media/lua/shared/Translate/EN/ItemName_EN.txt
+  media/shared/Translate/EN/ItemName_EN.txt
+  media/shared/Translate/EN/Recipes_EN.txt
 
 Outputs (generated per language, unless already exists):
-  media/lua/shared/Translate/<LANG>/ContextMenu_<LANG>.txt
-  media/lua/shared/Translate/<LANG>/ItemName_<LANG>.txt
+  media/shared/Translate/<LANG>/ItemName_<LANG>.txt
+  media/shared/Translate/<LANG>/Recipes_<LANG>.txt
 
 Notes:
-- Build 41 uses domain-specific tables (ContextMenu_XX, ItemName_XX).
+- Build 41 uses domain-specific tables (ItemName_XX, Recipes_XX).
 - Keys MUST remain identical. Only the *values* are translated.
 - Preserve placeholders like %1 exactly.
 - Preserve punctuation, parentheses, and Lua table structure
@@ -59,13 +59,17 @@ LANGS_DEFAULT = [
     "TH",   # ไทย
     "TR",   # Türkçe
     "UK",   # українська
+    "UA",   # українська (alternate code)
+    "NL",   # Nederlands
     "ZH",   # 中文（简体）
     "ZHTW", # 中文（繁體）
+    "CN",   # Chinese (generic)
+    "CH",   # Chinese (alternate)
 ]
 
 DOMAIN_FILES = [
-    ("ContextMenu", "ContextMenu"),
     ("ItemName", "ItemName"),
+    ("Recipes", "Recipes"),
 ]
 
 
@@ -77,7 +81,20 @@ class DomainTable:
 
 
 TABLE_HEADER_RE = re.compile(r"^\s*([A-Za-z0-9_]+)\s*=\s*\{\s*$")
-ENTRY_RE = re.compile(r'^\s*([A-Za-z0-9_.]+)\s*=\s*"(.*)"\s*,?\s*$')
+ENTRY_RE = re.compile(
+    r'''
+    ^\s*
+    (?:                             # either:
+        \[\s*"([^"]+)"\s*\]         #   ["string.key"]
+      |                             # or
+        ([A-Za-z0-9_.]+)            #   bare_identifier
+    )
+    \s*=\s*
+    "(.*)"
+    \s*,?\s*$
+    ''',
+    re.VERBOSE,
+)
 TABLE_END_RE = re.compile(r"^\s*\}\s*$")
 
 
@@ -111,8 +128,8 @@ def read_domain_table(path: Path) -> DomainTable:
 
         m = ENTRY_RE.match(line)
         if m:
-            key = m.group(1)
-            val = m.group(2)
+            key = m.group(1) or m.group(2)
+            val = m.group(3)
             # Unescape any escaped quotes in the value
             val = val.replace('\\"', '"')
             entries[key] = val
@@ -120,6 +137,11 @@ def read_domain_table(path: Path) -> DomainTable:
     if not table_name:
         raise ValueError(f"Could not find table header in {path}")
     domain = table_name.split("_", 1)[0]
+    if domain == "Recipe":
+        raise ValueError(
+            f"Invalid singular Recipe table detected in {path}. "
+            f"Expected 'Recipes_EN', not 'Recipe_EN'."
+        )
     return DomainTable(domain=domain, table_name=table_name, entries=entries)
 
 
@@ -162,7 +184,7 @@ def write_domain_table(out_path: Path, domain: str, lang: str, entries: Dict[str
         val = entries[key]
         # Escape quotes for Lua table string literal
         val = val.replace('"', '\\"')
-        lines.append(f'    {key} = "{val}",')
+        lines.append(f'    ["{key}"] = "{val}",')
     lines.append("}")
     lines.append("")  # newline
 
@@ -300,7 +322,7 @@ def main() -> int:
     base_dir = Path(args.base_dir)
     en_dir = base_dir / "EN"
     if not en_dir.exists():
-        print(f"ERROR: EN template folder not found: {en_dir}", file=sys.stderr)
+        print(f"ERROR: EN translation folder not found: {en_dir}", file=sys.stderr)
         return 2
 
     client = OpenAI()

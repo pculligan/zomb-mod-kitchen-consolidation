@@ -1,0 +1,22 @@
+module,piece_name,Soup,Stew,Salad,Stir fry,Stir fry Griddle Pan,Roasted Vegetables,Sandwich,Sandwich Baguette,Burger,Pie,RicePot,RicePan,PastaPot,PastaPan,Taco,Burrito,Omelette,Pizza
+KitchenConsolidation,FishPieces,15,15,10,15,15,15,5,5,10,15,15,15,15,15,10,15,,15
+KitchenConsolidation,MeatPieces,20,20,10,10,10,,,,20,10,20,20,20,20,10,10,10,20
+KitchenConsolidation,AvocadoPieces,16,16,8,8,8,,8,8,,15,15,15,15,15,15,15,15,15
+KitchenConsolidation,BellPepperPieces,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8
+KitchenConsolidation,BroccoliPieces,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9
+KitchenConsolidation,CabbagePieces,12,12,12,12,12,,6,6,6,6,,,,,6,6,,
+KitchenConsolidation,CarrotPieces,8,8,8,8,8,8,8,8,,8,8,8,8,8,,,,
+KitchenConsolidation,CornPieces,14,14,7,14,14,14,,,14,14,14,14,14,14,7,7,,
+KitchenConsolidation,DaikonPieces,6,12,4,12,12,12,,,,12,12,12,12,12,,,,
+KitchenConsolidation,EggplantPieces,16,16,8,16,16,16,4,4,8,16,16,16,16,16,,,8,8
+KitchenConsolidation,PepperHabaneroPieces,2,2,1,2,2,2,1,1,1,,2,2,2,2,1,1,1,2
+KitchenConsolidation,PepperJalapenoPieces,2,2,1,2,2,2,1,1,1,,2,2,2,2,1,1,1,2
+KitchenConsolidation,LeekPieces,12,12,6,12,12,,,,,12,12,12,12,12,,,6,
+KitchenConsolidation,MushroomPieces,13,13,13,13,13,13,13,13,13,13,13,13,13,13,,,6,13
+KitchenConsolidation,OnionPieces,5,5,2,2,2,,2,2,2,5,5,5,5,5,2,2,2,5
+KitchenConsolidation,PotatoPieces,18,18,18,18,18,18,,,,18,,,,,,,18,
+KitchenConsolidation,RedRadishPieces,3,3,1,1,1,,3,3,3,,,,,,,,,
+KitchenConsolidation,SeaweedPieces,3,,,,,,,,,,,,,,,,,
+KitchenConsolidation,TomatoPieces,12,12,6,6,6,,6,6,6,6,12,12,12,12,6,6,6,12
+KitchenConsolidation,ZucchiniPieces,10,10,10,10,10,,,,,5,10,10,10,10,,,5,10
+KitchenConsolidation,TofuPieces,10,10,10,10,10,,,,10,,10,10,10,10,5,10,,10

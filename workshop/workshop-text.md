@@ -5,7 +5,7 @@ Fixes food fragmentation without breaking balance or immersion.
 
 - Safely combines leftover food
 - Lets you prepare small meat and fish pieces into usable piles
-- Works with stews and soups without changing vanilla balance
+- Works with vanilla evolved recipes (stews, soups, salads, sandwiches, etc) without changing balance
 - No free food, no buffs, no recipe overrides
 
 ## What problem does this mod solve?
@@ -62,7 +62,8 @@ It fixes **fragmentation under constraint**:
 - Works for:
   - vanilla meats
   - modded meats
-  - containerized meats (e.g. canned ham)
+  - supported containerized meats (e.g. canned ham)
+  - dried meats
 - Containerized meats correctly return empty containers
 - Meat Pieces:
   - are additive piles

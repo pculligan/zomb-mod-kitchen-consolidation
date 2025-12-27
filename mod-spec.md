@@ -254,7 +254,7 @@ mod.info
 
 ### File Responsibilities
 
-#### `KitchenConsolidation_Context.lua` (client)
+#### `Context.lua` (client)
 Responsible for:
 - Context menu injection via `Events.OnFillInventoryObjectContextMenu`
 - Identifying eligible items using shared utility functions
@@ -262,7 +262,7 @@ Responsible for:
 - Creating and enqueueing timed actions
 - No inventory mutation occurs in this file
 
-#### `KitchenConsolidation_Util.lua` (shared)
+#### `Util.lua` (shared)
 Pure logic and deterministic helpers. No UI and no event hooks.
 
 Responsibilities:
@@ -275,7 +275,7 @@ Responsibilities:
 
 This file must be side-effect free except where explicitly returning merge plans.
 
-#### `KitchenConsolidation_Action.lua` (shared)
+#### `Action.lua` (shared)
 Defines the timed action that performs the merge.
 
 Responsibilities:
