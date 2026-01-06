@@ -3,7 +3,7 @@
 -- -- No inventory mutation allowed in this file
 
 
--- local Runtime = require("Runtime/Runtime")
+-- local Runtime = require("infra/Runtime")
 -- local assured = Runtime.Guard.assured
 -- local failOn = Runtime.Guard.failOn
 -- local warnOn = Runtime.Guard.warnOn
@@ -11,13 +11,13 @@
 
 
 -- local ConsolidateAction = require("TimedActions/ConsolidateAction")
--- local FoodInstance = require("Domain/FoodInstance")
+-- local FoodInstance = require("core/domain/FoodInstance")
 
 -- if failOn(not (FoodInstance and FoodInstance.fromItem),
 --     "Consolidate.lua: FoodInstance module is missing or invalid; consolidation disabled for this session") then
 --     return
 -- end
--- local FoodRegistry = require("Domain/FoodRegistry")
+-- local FoodRegistry = require("core/domain/FoodRegistry")
 -- local Registry = FoodRegistry.instance
 -- warnOn(not (ConsolidateAction and ConsolidateAction.new),
 --     "Consolidate.lua: ConsolidateAction:new is missing (require returned " .. tostring(ConsolidateAction) .. ")")

@@ -2,7 +2,7 @@
 -- Phase 1 FoodType registry for CookingTime / SoulFilcher items
 -- Data-only. No logic.
 
-local FoodType = require "Domain/FoodType"
+local FoodType = require "core/domain/FoodType"
 
 local FoodTypes = {
 

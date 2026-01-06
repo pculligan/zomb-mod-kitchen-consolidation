@@ -6,12 +6,12 @@ Generate Project Zomboid Build 41 localization files by translating the EN table
 with OpenAI, using a context-rich prompt.
 
 Inputs (expected):
-  media/shared/Translate/EN/ItemName_EN.txt
-  media/shared/Translate/EN/Recipes_EN.txt
+  media//Translate/EN/ItemName_EN.txt
+  media//Translate/EN/Recipes_EN.txt
 
 Outputs (generated per language, unless already exists):
-  media/shared/Translate/<LANG>/ItemName_<LANG>.txt
-  media/shared/Translate/<LANG>/Recipes_<LANG>.txt
+  media//Translate/<LANG>/ItemName_<LANG>.txt
+  media//Translate/<LANG>/Recipes_<LANG>.txt
 
 Notes:
 - Build 41 uses domain-specific tables (ItemName_XX, Recipes_XX).
@@ -307,7 +307,7 @@ def validate_translation(
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Generate PZ B41 translations via OpenAI using EN as template.")
-    ap.add_argument("--base-dir", default="kitchenconsolidation/media/lua/shared/Translate", help="Translate directory (default: kitchenconsolidation/media/lua/shared/Translate)")
+    ap.add_argument("--base-dir", default="kitchenconsolidation/media/lua//Translate", help="Translate directory (default: kitchenconsolidation/media/lua//Translate)")
     ap.add_argument("--model", default="gpt-5.2", help="OpenAI model name (default: gpt-5.2)")
     ap.add_argument("--langs", nargs="*", default=LANGS_DEFAULT, help="Target language codes (default: common set)")
     ap.add_argument("--force", action="store_true", help="Overwrite existing target files")

@@ -6,7 +6,7 @@ INVARIANTS:
   - No Lua type() checks on engine objects.
 ]]
 
-local Runtime = require("Runtime/Runtime")
+local Runtime = require("infra/Runtime")
 local assured = Runtime.Guard.assured
 local failOn = Runtime.Guard.failOn
 local warnOn = Runtime.Guard.warnOn
@@ -17,7 +17,7 @@ local trace = Runtime.Logger.trace
 local Optional = Runtime.Optional
 
 
-local FoodRegistry = require("Domain/FoodRegistry")
+local FoodRegistry = require("core/domain/FoodRegistry")
 local Registry = FoodRegistry.instance
 
 local Engine = require("Engine/Engine")
@@ -26,7 +26,7 @@ local ItemWeight = Engine.ItemWeight
 local ItemFood = Engine.ItemFood
 local Inventory = Engine.Inventory
 
-local PrepResult = require("Domain/PrepResult")
+local PrepResult = require("core/domain/PrepResult")
 
 local FoodInstance = {}
 

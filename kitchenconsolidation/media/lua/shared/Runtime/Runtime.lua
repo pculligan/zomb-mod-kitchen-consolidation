@@ -2,10 +2,10 @@
 local Runtime = {}
 
 
-Runtime.Optional = require "Runtime/Optional"
+Runtime.Optional = require "infra/Optional"
 
-Runtime.Logger = require "Runtime/Logger"
+Runtime.Logger = require "infra/Logger"
 
-Runtime.Guard = require "Runtime/Guard"
+Runtime.Guard = require "infra/Guard"
 
 return Runtime

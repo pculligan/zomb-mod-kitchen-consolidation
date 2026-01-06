@@ -241,7 +241,7 @@ media/
   lua/
     client/
       KitchenConsolidation_Context.lua
-    shared/
+    /
       KitchenConsolidation_Util.lua
       KitchenConsolidation_Action.lua
       Translate/
@@ -672,9 +672,9 @@ In single selected merge, stick to one output by merging repeatedly.
 
 ```
 media/lua/client/KitchenConsolidation_Context.lua
-media/lua/shared/KitchenConsolidation_Util.lua
-media/lua/shared/KitchenConsolidation_Action.lua
-media/lua/shared/Translate/EN/CombineOpenedCans_EN.txt
+media/lua//KitchenConsolidation_Util.lua
+media/lua//KitchenConsolidation_Action.lua
+media/lua//Translate/EN/CombineOpenedCans_EN.txt
 mod.info
 ```
 

@@ -1,4 +1,4 @@
-local FoodType = require "Domain/FoodType"
+local FoodType = require "core/domain/FoodType"
 
 local KC_FOOD_TYPES = {
     -- Vegetable Pieces (authoritative from kitchenconsolidation_vegetable.txt)

@@ -3,14 +3,14 @@
 -- Auto-consolidation is OFF by default and must be explicitly enabled via SandboxVars.
 
 
-local Runtime = require("Runtime/Runtime")
+local Runtime = require("infra/Runtime")
 
 local assured = Runtime.Guard.assured
 local failOn = Runtime.Guard.failOn
 local warnOn = Runtime.Guard.warnOn
 
 
-local FoodRegistry = require("Domain/FoodRegistry")
+local FoodRegistry = require("core/domain/FoodRegistry")
 
 -- Prime FoodType registry from known sources (each module must return a list)
 local sources = {

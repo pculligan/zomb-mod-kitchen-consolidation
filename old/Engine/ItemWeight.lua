@@ -6,7 +6,7 @@
 -- Writes weight only via item:setWeight(value)
 -- Enables setCustomWeight if present, but does not depend on it
 
-local Runtime = require("Runtime/Runtime")
+local Runtime = require("infra/Runtime")
 local Log = Runtime.Logger
 local Optional = Runtime.Optional
 

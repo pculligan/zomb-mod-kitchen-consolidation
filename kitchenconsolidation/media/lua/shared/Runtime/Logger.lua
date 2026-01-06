@@ -58,7 +58,7 @@ function Logger.setLogLevel(level)
 end
 
 -- Default log level is WARN
-Logger.setLogLevel(LOGLEVELS.DEBUG)
+Logger.setLogLevel(LOGLEVELS.WARN)
 
 -- Deprecated compatibility wrapper
 function Logger.setDebug(enabled)
@@ -70,4 +70,27 @@ function Logger.setDebug(enabled)
 end
 
 Logger.LOGLEVELS = LOGLEVELS
+
+-- String-based adapter for sandbox / config usage
+function Logger.setLogLevelFromString(level)
+    if type(level) ~= "string" then
+        Logger.setLogLevel(Logger.LOGLEVELS.WARN)
+        return
+    end
+
+    local upper = string.upper(level)
+
+    if upper == "TRACE" then
+        Logger.setLogLevel(Logger.LOGLEVELS.TRACE)
+    elseif upper == "DEBUG" then
+        Logger.setLogLevel(Logger.LOGLEVELS.DEBUG)
+    elseif upper == "WARN" then
+        Logger.setLogLevel(Logger.LOGLEVELS.WARN)
+    elseif upper == "ERROR" then
+        Logger.setLogLevel(Logger.LOGLEVELS.ERROR)
+    else
+        Logger.setLogLevel(Logger.LOGLEVELS.WARN)
+    end
+end
+
 return Logger

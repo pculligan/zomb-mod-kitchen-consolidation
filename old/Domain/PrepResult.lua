@@ -1,6 +1,6 @@
 
 
-local Runtime = require("Runtime/Runtime")
+local Runtime = require("infra/Runtime")
 local assured = Runtime.Guard.assured
 local failOn = Runtime.Guard.failOn
 local warnOn = Runtime.Guard.warnOn

@@ -63,7 +63,7 @@ These rules are enforced both in code and in the spec.
 │       │   ├── KitchenConsolidation_PrepareFish.lua
 │       │   └── KitchenConsolidation_PrepareMeat.lua
 │       │
-│       └── shared/                # Core logic and policies
+│       └── /                # Core logic and policies
 │           ├── KitchenConsolidation_Util.lua
 │           ├── KitchenConsolidation_PrepareFishAction.lua
 │           ├── KitchenConsolidation_PrepareMeatAction.lua
@@ -163,7 +163,7 @@ English is the source language.
 
 Translations live in:
 ```
-media/lua/shared/Translate/<LANG>/
+media/lua//Translate/<LANG>/
 ```
 
 Supported / planned languages are listed in the Workshop description.
@@ -227,3 +227,207 @@ See:
   https://theindiestone.com/forums/index.php?/topic/2530-mod-permissions/#comment-36478
 
 All rights reserved.
+# Kitchen Consolidation
+
+**Project Zomboid (Build 41) mod** that reduces food fragmentation by allowing
+careful, explicit consolidation of partial foods — while preserving vanilla
+balance, safety rules, and cooking mechanics.
+
+Kitchen Consolidation is intentionally conservative.  
+It is less about “adding features” and more about **doing the right thing inside
+the constraints of the Project Zomboid engine**.
+
+
+## What this mod does
+
+Kitchen Consolidation addresses a common mid‑/late‑game problem in Project Zomboid:
+**inventory clutter and wasted nutrition caused by many partially used food items**.
+
+The mod provides:
+
+- **Explicit consolidation** of partial foods (nothing happens automatically)
+- **Preparation steps** that convert many small items into *fungible piles*
+- **Support for containerized foods** (cans, jars, bottles) with correct byproducts
+- **Clean integration with vanilla stews, soups, rice, and pasta**
+- **Strict preservation of vanilla safety rules** (freshness, sickness, poisoning)
+
+It deliberately **does not**:
+- add free food or buffs
+- change hunger math or nutrition balance
+- override vanilla recipes
+- automate food merging
+- “fix” engine behavior with hacks
+
+For the full player‑facing description, see:
+- 📄 **Workshop description**: [`workshop-text.md`](./workshop-text.md)
+
+
+## Design philosophy
+
+Kitchen Consolidation follows three non‑negotiable rules:
+
+1. **Preparation is explicit**  
+   Food is never merged automatically. Identity is discarded only by player action.
+
+2. **Worst‑case safety applies**  
+   Combining food never makes it safer than its worst ingredient.
+
+3. **Vanilla systems come first**  
+   Hunger, freshness, spoilage, poisoning, stews, soups, rice, and pasta all use
+   base‑game mechanics exactly as intended.
+
+These rules are enforced in both code and data.
+
+
+## High‑level behavior
+
+### Consolidation
+- Partial foods can be combined **only when the player chooses to do so**
+- Hunger is conserved and capped correctly
+- Multiple outputs are produced when appropriate (e.g. 5 halves → 2 full + 1 partial)
+- Empty or zero‑nutrition food items are never created
+
+### Preparation (Pieces)
+- Many foods can be explicitly prepared into **Pieces**
+- Pieces behave like vanilla partial‑use foods
+- Pieces are fungible and combine cleanly
+- Base hunger capacity is canonical and never mutated at runtime
+
+### Containerized foods
+- Supported containerized foods can be consolidated
+- Correct empty containers are returned (e.g. empty cans)
+- Behavior is whitelist‑driven and conservative
+- No assumptions are made about unsupported items
+
+### Cooking integration
+- Pieces participate in stews, soups, rice, and pasta via **vanilla EvolvedRecipe mechanics**
+- No `evolvedrecipe {}` blocks are overridden or redefined
+- Balance and progression remain unchanged
+
+
+## Repository structure
+
+```
+.
+├── README.md                      # This file
+├── mod-spec.md                    # Canonical behavior & guarantees
+├── learnings.md                   # Engine quirks and hard‑won lessons
+├── workshop-text.md               # Steam Workshop description
+│
+├── media/
+│   ├── scripts/                   # Item definitions (PZ DSL, not Lua)
+│   │   ├── pieces.txt             # Generated item + recipe definitions
+│   │   └── containerized.txt      # Generated container combine recipes
+│   │
+│   └── lua/
+│       ├── client/                # UI only (context menus)
+│       │   └── KitchenConsolidation_Context.lua
+│       │
+│       └── /                # Core gameplay logic
+│           ├── RecipeExtensions.lua
+│           ├── RecipeContainerized.lua
+│           ├── Runtime/
+│           │   └── Logger.lua
+│           ├── Sandbox.lua        # Sandbox options (log level)
+│           └── Translate/
+│               └── <LANG>/
+│                   ├── ItemName_<LANG>.txt
+│                   └── Recipes_<LANG>.txt
+│
+└── scripts/
+    ├── gen-items.py               # Item / recipe generator
+    ├── translate.py               # Translation generator
+    └── dev-symlink.sh             # Dev helper
+```
+
+
+## Data‑driven design
+
+All eligibility and behavior is **data‑driven**:
+
+- Which foods can be prepared
+- Which containerized foods are supported
+- Which byproducts are returned
+- Which foods participate in evolved recipes
+
+This makes the mod:
+- predictable
+- debuggable
+- compatible with other mods
+- safe to extend
+
+
+## Tooling
+
+### Item & recipe generation
+`gen-items.py` generates:
+- item definitions
+- combine recipes
+- containerized recipes
+- EN translation templates
+
+This avoids hand‑written duplication and keeps behavior consistent.
+
+### Translation generation
+`translate.py`:
+- treats EN as the source of truth
+- preserves keys exactly
+- supports string‑keyed Lua tables
+- generates `Recipes_<LANG>` and `ItemName_<LANG>` files
+
+### Supported languages
+The supported language list is explicit and non‑duplicative.
+See the Workshop description for the authoritative list.
+
+
+## Logging & diagnostics
+
+Kitchen Consolidation includes a **user‑configurable log level**.
+
+In Sandbox Options:
+```
+Sandbox Options → Mods → Kitchen Consolidation → Log Level
+```
+
+Options:
+- **WARN** (default)
+- **DEBUG**
+- **TRACE**
+
+This allows:
+- quiet gameplay by default
+- deep diagnostics when troubleshooting
+- server‑controlled logging in multiplayer
+
+
+## Development notes
+
+- Lua changes require a world reload or game restart
+- Item script changes require a **new save**
+- Item and evolved behavior is cached aggressively by the engine
+- Never assume item DSL errors will surface clearly — they often fail silently
+
+If you plan to extend this mod, **read first**:
+- 📘 [`learnings.md`](./learnings.md)
+
+
+## Contributions
+
+Contributions are welcome, especially:
+- compatibility extensions
+- translation improvements
+- bug fixes with reproduction steps
+
+Please:
+- discuss behavior changes in an issue first
+- keep changes aligned with the spec
+- avoid recipe overrides or invasive hooks
+
+
+## License / permissions
+
+This mod may not be repackaged or redistributed without explicit permission
+from the author.
+
+See:
+https://theindiestone.com/forums/index.php?/topic/2530-mod-permissions/#comment-36478

@@ -3,7 +3,7 @@
 -- No abstraction, no state
 
 
-local Runtime = require("Runtime/Runtime")
+local Runtime = require("infra/Runtime")
 local debug = Runtime.Logger.debug
 local Optional = Runtime.Optional
 

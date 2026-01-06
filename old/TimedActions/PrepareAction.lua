@@ -9,7 +9,7 @@
 --
 -- This action does NOT aggregate hunger or normalize nutrition.
 
-local Runtime = require("Runtime/Runtime")
+local Runtime = require("infra/Runtime")
 local assured = Runtime.Guard.assured
 local failOn = Runtime.Guard.failOn
 local warnOn = Runtime.Guard.warnOn
@@ -18,7 +18,7 @@ local debug = Runtime.Logger.debug
 local Log = Runtime.Logger
 
 
-local FoodInstance = require("Domain/FoodInstance")
+local FoodInstance = require("core/domain/FoodInstance")
 
 PrepareAction = ISBaseTimedAction:derive("PrepareAction")
 

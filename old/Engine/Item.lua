@@ -2,7 +2,7 @@
 -- Identity + validity shim only.
 -- No mutation.
 
-local Runtime = require("Runtime/Runtime")
+local Runtime = require("infra/Runtime")
 local debug = Runtime.Logger.debug
 local Optional = Runtime.Optional
 

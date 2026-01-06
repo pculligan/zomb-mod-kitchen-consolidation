@@ -61,10 +61,10 @@ Both **text files** and **Lua tables** can work in Build 41, *but only when they
 Examples that work:
 
 ```
-media/lua/shared/Translate/EN/ContextMenu_EN.txt
+media/lua//Translate/EN/ContextMenu_EN.txt
 → defines ContextMenu_EN = { ... }
 
-media/lua/shared/Translate/EN/ItemName_EN.txt
+media/lua//Translate/EN/ItemName_EN.txt
 → defines ItemName_EN = { ... }
 ```
 
@@ -694,3 +694,227 @@ This lesson generalizes beyond food:
 > Any system that depends on a “base value” should verify that base at runtime, not trust definitions alone.
 
 ---
+
+# Kitchen Consolidation – Key Learnings (Build 41)
+
+This document captures **non‑obvious engine behaviors and hard‑won lessons** discovered while building *Kitchen Consolidation* for **Project Zomboid Build 41**.
+
+It is intentionally practical:
+- what the engine actually does
+- what failed (and why)
+- what patterns proved stable
+
+
+## 0. The Two Rules That Saved This Mod
+
+1. **Prefer data over logic.**  
+   When possible, use whitelist tables (CSV → generated Lua/script) instead of clever predicates.
+
+2. **Never trust a single “source of truth.”**  
+   Item scripts, engine getters, and UI display values can disagree. Always validate invariants at point‑of‑use.
+
+
+## 1. Translation Domains Are Real, Strict, and Plural Matters
+
+Build 41 recognizes **specific translation domains**. Keys must match the domain exactly.
+
+### Domains we use
+- `ItemName_*` → item display names
+- `Recipes_*` (plural) → recipe names
+- `Sandbox_*` → sandbox option labels
+
+**Important:**
+- The correct recipe domain is **`Recipes_*`**, not `Recipe_*`.
+- Files must be named `ItemName_XX.txt` and `Recipes_XX.txt`.
+
+### Key format: always use bracketed string keys
+If your key contains **dots** (e.g. `KitchenConsolidation.FishPieces`), you must emit string keys:
+
+```lua
+ItemName_EN = {
+  ["ItemName_KitchenConsolidation.FishPieces"] = "Fish Pieces",
+}
+
+Recipes_EN = {
+  ["Recipe_CombineCannedCornOpen"] = "Combine Canned Corn",
+}
+```
+
+Bare identifiers silently fail for dotted keys.
+
+### Translation tooling lesson
+Your translation generator must:
+- **parse** bracketed keys (`["Key"] = "Value"`)
+- **emit** bracketed keys for all languages
+- never dedupe by overwriting silently (Lua tables are last‑write‑wins)
+
+
+## 2. Item Script DSL Is Not Lua
+
+Project Zomboid item scripts are a **custom DSL**. Common pitfalls:
+
+- `//` is a comment. `--` is **not** a comment in item scripts.
+- Wrong syntax often fails *silently* and surfaces later as missing items, bad recipes, or UI crashes.
+- Booleans must be lowercase (`true`/`false`) where applicable.
+- Some fields that look boolean are actually **item references** (e.g. `ReplaceOnUse`).
+
+**Rule:** Emit the smallest valid item definitions possible; validate in-game after generation.
+
+
+## 3. Java Collections Are Not Lua Tables (Kahlua)
+
+Many PZ APIs return **Java lists** (ArrayList). You cannot iterate them with `pairs()`.
+
+Correct pattern:
+
+```lua
+local list = sm:getAllEvolvedRecipes()
+for i = 0, list:size() - 1 do
+  local r = list:get(i)
+end
+```
+
+
+## 4. Food Values in Lua Are Runtime‑Normalized (Do Not Mix Units)
+
+Food hunger values in item scripts are authoring values, but in Lua getters you often see **normalized runtime values**.
+
+You must reason using **the runtime values you observe**:
+- `getBaseHunger()`
+- `getHungerChange()` / `getHungChange()`
+
+**Rule:** never hardcode “script-scale” hunger math in Lua. Always compute using getter values.
+
+### Corollary: never set base hunger from a computed value
+A major regression came from doing:
+
+```lua
+result:setBaseHunger(-base)   -- where base came from getBaseHunger()
+```
+
+This corrupts capacity and causes UI/math inconsistency.
+
+**KitchenConsolidation rule:**
+- Base capacity is canonical (item definition / engine)
+- We mutate **remaining hunger** only
+
+
+## 5. Combine Math Must Support Multi‑Yield Outputs
+
+Any single-result merge model is wrong once total remaining content exceeds one full unit.
+
+Correct model:
+
+```text
+fullCount = floor(total / capacity)
+remainder = total - fullCount*capacity
+```
+
+Outputs:
+- `fullCount` full items
+- + one partial item if `remainder > 0`
+
+### Invariant: never create zero-hunger Food items
+A `Food` with hunger `0` breaks the UI (stack-like artifacts, missing nutrition bar).
+
+**Rule:** never emit an output with `HungerChange == 0`. Skip it.
+
+
+## 6. Eligibility Is Hot‑Path; Execution Must Be Authoritative
+
+Context menu evaluation runs frequently and may be invoked multiple times per click.
+
+**Eligibility** should:
+- be fast
+- side‑effect free
+- optionally trace-level logged
+
+**Execution** (`OnCreate`) must:
+- validate invariants again
+- perform all inventory mutation deterministically
+
+
+## 7. Containerized Foods Need Net Container Math
+
+Byproducts (empty cans/jars/bottles) are a **net arithmetic problem**, not “emit per input item.”
+
+Correct invariant:
+
+```text
+empties = consumedContainers - producedContainers
+```
+
+Where:
+- producedContainers = number of output containerized items (fulls + partial if any)
+
+### Data-driven byproduct lookup
+We moved container byproducts to a CSV → generated Lua lookup:
+- `byproductLookup(itemId)` returns `nil` (not containerized) or `{ ... }` (possibly empty)
+
+This removed hardcoded lists and made compatibility scalable.
+
+
+## 8. Missing Script Items Must Not Crash Recipes
+
+`getScriptManager():FindItem(fullType)` can return `nil` if:
+- game version differs
+- a compat mod isn’t installed
+- an ID is wrong
+
+Adding `nil` to recipe item lists causes later crashes.
+
+**Rule:** always guard FindItem calls and log missing fullTypes during dev.
+
+
+## 9. Evolved Recipes: Do Not Override `evolvedrecipe {}` Blocks
+
+This was the most time-consuming engine trap.
+
+**Correct participation mechanism:** item-level
+
+```text
+EvolvedRecipe = Soup:15;Stew:15;...
+```
+
+**Do not** generate or override `evolvedrecipe {}` blocks to “add ingredients.”  
+Partial overrides can lead to `resultItem == nil` crashes deep in UI code.
+
+**Rule:** leave vanilla evolved recipes alone; declare participation on items only.
+
+Also:
+- avoid trailing semicolons in `EvolvedRecipe` strings
+
+
+## 10. Mod Output Organization Matters (Load Stability)
+
+We stabilized the mod by:
+- generating consolidated script files (`pieces.txt`, `containerized.txt`)
+- avoiding many small files that reorder unpredictably
+- keeping Lua in the proper server/shared context
+
+Load-order issues are real; reduce surface area.
+
+
+## 11. Logging Must Be Configurable and Quiet by Default
+
+Context menu eligibility logging can flood logs.
+
+We implemented:
+- sandbox dropdown (WARN/DEBUG/TRACE)
+- trace-level logging for hot-path diagnostics
+
+**Rule:** default should be quiet; trace should be opt-in.
+
+
+## Final takeaway
+
+Build 41 is not forgiving:
+- many failures are silent
+- multiple systems look similar but are not connected
+- “it should work” is not evidence
+
+When something breaks:
+1. verify scripts load (no DSL syntax issues)
+2. verify Lua loads (no Kahlua syntax / Java interop mistakes)
+3. verify invariants via engine getters (don’t trust UI)
+4. reduce scope: make behavior explicit and data-driven

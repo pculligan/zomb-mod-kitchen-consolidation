@@ -1,5 +1,5 @@
 local GUARD = {}
-local Log = require("Runtime/Logger")
+local Log = require("infra/Logger")
 
 function GUARD.failOn(cond, msg)
     if not cond then return false end

@@ -67,14 +67,24 @@ echo "Workshop:  ${dst_root}"
 rm -rf "${dst_root}"
 mkdir -p "${dst_contents}"
 
+# NOTE:
+# Each mod may contain a 'source/' directory (generators, Excel, tooling).
+# This directory must NEVER be published to the Workshop.
+
 # --- Copy mod payload ---
 rsync -av \
   --exclude='.git*' \
   --exclude='*.md' \
   --exclude='scripts/' \
   --exclude='workshop/' \
+  --exclude='source/' \
   "${src_mod}/" \
   "${dst_contents}/"
+
+echo "Excluding non-publishable directories (source/, scripts/, workshop/)"
+
+# --- Remove non-publishable directories (defensive) ---
+rm -rf "${dst_contents}/source"
 
 # --- Copy workshop metadata ---
 cp "${src_mod}/poster.png" "${dst_root}/${modid}/preview.png"
