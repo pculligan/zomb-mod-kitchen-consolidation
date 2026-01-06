@@ -1,0 +1,108 @@
+# Canonical pipe geometry definitions.
+# Geometry is expressed in logical units and projected per-surface.
+
+tile:
+  width: 128
+  height: 256
+
+anchor:
+  # Central anchor point for centered pipes
+  x: 64
+  y: 128
+
+pipes:
+  straight:
+    segments:
+      EW:
+        - start: [0, 0, 0]
+          end:   [32, 0, 0]
+      NS:
+        - start: [0, 0, 0]
+          end:   [0, 32, 0]
+
+  elbow:
+    segments:
+      NE:
+        - start: [0, 0, 0]
+          end:   [0, -32, 0]
+        - start: [0, 0, 0]
+          end:   [32, 0, 0]
+
+      ES:
+        - start: [0, 0, 0]
+          end:   [32, 0, 0]
+        - start: [0, 0, 0]
+          end:   [0, 32, 0]
+
+      SW:
+        - start: [0, 0, 0]
+          end:   [0, 32, 0]
+        - start: [0, 0, 0]
+          end:   [-32, 0, 0]
+
+      WN:
+        - start: [0, 0, 0]
+          end:   [-32, 0, 0]
+        - start: [0, 0, 0]
+          end:   [0, -32, 0]
+
+  tee:
+    segments:
+      NEW:
+        - start: [0, 0, 0]
+          end:   [0, -32, 0]
+        - start: [0, 0, 0]
+          end:   [32, 0, 0]
+        - start: [0, 0, 0]
+          end:   [-32, 0, 0]
+
+      NES:
+        - start: [0, 0, 0]
+          end:   [0, -32, 0]
+        - start: [0, 0, 0]
+          end:   [32, 0, 0]
+        - start: [0, 0, 0]
+          end:   [0, 32, 0]
+
+      ESW:
+        - start: [0, 0, 0]
+          end:   [32, 0, 0]
+        - start: [0, 0, 0]
+          end:   [0, 32, 0]
+        - start: [0, 0, 0]
+          end:   [-32, 0, 0]
+
+      NSW:
+        - start: [0, 0, 0]
+          end:   [0, -32, 0]
+        - start: [0, 0, 0]
+          end:   [0, 32, 0]
+        - start: [0, 0, 0]
+          end:   [-32, 0, 0]
+
+  cross:
+    segments:
+      NESW:
+        - start: [0, 0, 0]
+          end:   [0, -32, 0]
+        - start: [0, 0, 0]
+          end:   [32, 0, 0]
+        - start: [0, 0, 0]
+          end:   [0, 32, 0]
+        - start: [0, 0, 0]
+          end:   [-32, 0, 0]
+
+  end:
+    segments:
+      N:
+        - start: [0, 0, 0]
+          end:   [0, -32, 0]
+      E:
+        - start: [0, 0, 0]
+          end:   [32, 0, 0]
+      S:
+        - start: [0, 0, 0]
+          end:   [0, 32, 0]
+      W:
+        - start: [0, 0, 0]
+          end:   [-32, 0, 0]

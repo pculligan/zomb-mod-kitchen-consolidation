@@ -1,0 +1,25 @@
+# Pipe set definitions.
+# Each pipe set represents a visual/material family.
+# All values are authoritative inputs to the renderer.
+
+steel_basic:
+  description: "Basic centered steel pipe, clean, vanilla-aligned"
+  thickness: 4
+
+  colors:
+    body: [160, 160, 160, 255]
+    highlight: [200, 200, 200, 255]
+    shadow: [90, 90, 90, 255]
+
+  rust:
+    enabled: false
+
+  seams:
+    enabled: true
+    spacing: 16
+    width: 1
+
+  offsets:
+    floor: [0, 0]
+    wall_n: [0, 0]
+    wall_w: [0, 0]

@@ -1,0 +1,2 @@
+pyyaml
+pillow   # will be needed next

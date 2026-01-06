@@ -1,0 +1,28 @@
+# Vanilla-perfect lighting model for Project Zomboid
+# Assumes light source from the south-east.
+# No rotation or mirroring is permitted.
+
+global:
+  light_direction: [1, -1]   # southeast
+  shadow_direction: [-1, 1]  # northwest
+
+surfaces:
+  floor:
+    shadow_offset: [-4, 4]
+    shadow_alpha: 120
+    underside_darkening: 0.15
+
+  wall_n:
+    shadow_offset: [-3, 3]
+    shadow_alpha: 110
+    underside_darkening: 0.20
+
+  wall_w:
+    shadow_offset: [-3, 3]
+    shadow_alpha: 110
+    underside_darkening: 0.20
+
+highlights:
+  enabled: true
+  thickness: 1
+  intensity: 0.18
