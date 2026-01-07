@@ -389,10 +389,6 @@ def apply_aa_mask(
                 px[xx, y] = (mul_rgb[0], mul_rgb[1], mul_rgb[2], alpha)
 
 
-# ============================================================
-# Geometry + render orchestration
-# ============================================================
-
 @dataclass(frozen=True)
 class RenderJob:
     pipe_set: str
@@ -412,72 +408,175 @@ FLOOR_CY = TILE_H - 33
 WALL_CUBE_PX = TILE_W // 2          # 64px per cube
 WALL_HEIGHT_CUBES = 3
 WALL_HEIGHT_PX = WALL_CUBE_PX * WALL_HEIGHT_CUBES
-WALL_N_BASE_CY_OFFSET = TILE_W // 4  # top vertex of floor diamond
+# Top vertex of the floor diamond in screen space (2:1 iso)
+WALL_N_BASE_CY_OFFSET = TILE_W // 4
 WALL_PIPE_Z_PX = WALL_CUBE_PX * 2    # default horizontal pipe height
 
 
-def iso_project_floor(x: float, y: float, cx: int, cy: int) -> Tuple[int, int]:
-    sx = cx + (x - y)
-    sy = cy + (x + y) // 2
-    return int(sx), int(sy)
+# --- Floor deterministic thick-line drawing helper ---
+
+def draw_floor_line(
+    draw: ImageDraw.ImageDraw,
+    p1: Tuple[int, int],
+    p2: Tuple[int, int],
+    *,
+    thickness: int,
+    diagonal: bool,
+    color: Tuple[int, int, int, int],
+) -> None:
+    """
+    Draw a floor pipe segment as `thickness` parallel 1px lines.
+
+    diagonal=True  -> EW floor pipe (offset in screen-vertical direction)
+    diagonal=False -> NS floor pipe (offset in screen-horizontal direction)
+    """
+    half_w = thickness // 2
+    if diagonal:
+        # offset vertically
+        for dy in range(-half_w, -half_w + thickness):
+            draw.line(
+                [(p1[0], p1[1] + dy), (p2[0], p2[1] + dy)],
+                fill=color,
+                width=1,
+            )
+    else:
+        # offset horizontally
+        for dx in range(-half_w, -half_w + thickness):
+            draw.line(
+                [(p1[0] + dx, p1[1]), (p2[0] + dx, p2[1])],
+                fill=color,
+                width=1,
+            )
+
+# --- Floor pipe end cap helper ---
+def draw_floor_end_cap(
+    draw: ImageDraw.ImageDraw,
+    center: Tuple[int, int],
+    *,
+    thickness: int,
+    diagonal: bool,
+    color: Tuple[int, int, int, int],
+) -> None:
+    """
+    Draw a square end cap for a floor pipe.
+
+    For diagonal (EW) pipes:
+      - End cap is screen-vertical (flat cut)
+    For non-diagonal (NS) pipes:
+      - End cap is screen-horizontal (flat cut)
+    """
+    cx, cy = center
+    half_w = thickness // 2
+
+    if diagonal:
+        # Vertical cap
+        for dx in range(-half_w, -half_w + thickness):
+            for dy in range(-half_w + 1, half_w):
+                draw.point((cx + dx, cy + dy), fill=color)
+    else:
+        # Horizontal cap: thin slice
+        for dy in range(-half_w, -half_w + thickness):
+            draw.point((cx, cy + dy), fill=color)
 
 
-# ============================================================
-# North wall projection with explicit wall-local origin
-# ============================================================
+def render_floor(job: RenderJob, base_color: Tuple[int, int, int, int], thickness: int) -> Image.Image:
+    img = Image.new("RGBA", (TILE_W, TILE_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    half = TILE_W // 4
+    segments: list[tuple[float, float, float, float, bool]] = []
+
+    if job.shape == "straight":
+        if job.variant == "EW":
+            segments = [(-half, 0, half, 0, True)]
+        else:
+            segments = [(0, -half, 0, half, False)]
+
+    elif job.shape == "elbow":
+        if job.variant == "NE":
+            segments = [(0, 0, 0, -half, False), (0, 0, half, 0, True)]
+        elif job.variant == "ES":
+            segments = [(0, 0, half, 0, True), (0, 0, 0, half, False)]
+        elif job.variant == "SW":
+            segments = [(0, 0, 0, half, False), (0, 0, -half, 0, True)]
+        elif job.variant == "WN":
+            segments = [(0, 0, -half, 0, True), (0, 0, 0, -half, False)]
+
+    elif job.shape == "tee":
+        if job.variant == "NEW":
+            segments = [(0, 0, 0, -half, False), (0, 0, half, 0, True), (0, 0, -half, 0, True)]
+        elif job.variant == "NES":
+            segments = [(0, 0, 0, -half, False), (0, 0, half, 0, True), (0, 0, 0, half, False)]
+        elif job.variant == "ESW":
+            segments = [(0, 0, half, 0, True), (0, 0, 0, half, False), (0, 0, -half, 0, True)]
+        elif job.variant == "NSW":
+            segments = [(0, 0, 0, -half, False), (0, 0, 0, half, False), (0, 0, -half, 0, True)]
+
+    elif job.shape == "cross":
+        segments = [
+            (0, 0, 0, -half, False),
+            (0, 0, half, 0, True),
+            (0, 0, 0, half, False),
+            (0, 0, -half, 0, True),
+        ]
+
+    elif job.shape == "end":
+        if job.variant == "N":
+            segments = [(0, 0, 0, -half, False)]
+        elif job.variant == "E":
+            segments = [(0, 0, half, 0, True)]
+        elif job.variant == "S":
+            segments = [(0, 0, 0, half, False)]
+        elif job.variant == "W":
+            segments = [(0, 0, -half, 0, True)]
+
+    for x1, y1, x2, y2, diagonal in segments:
+        p1 = iso_project_floor(x1, y1, FLOOR_CX, FLOOR_CY)
+        p2 = iso_project_floor(x2, y2, FLOOR_CX, FLOOR_CY)
+
+        # Floor pipe body: use Pillow stroke for stable end caps
+        draw.line([p1, p2], fill=base_color, width=thickness)
+
+    # --- SHADING PIPELINE (unchanged) ---
+    apply_bulk_bias(img)
+    top_points, top_bulk, bottom_points, bottom_bulk = classify_floor_edges(img)
+    apply_bulk_edge_masks(img, top_bulk, bottom_bulk)
+    apply_point_edge_masks(img, top_points, bottom_points)
+    all_bulk_edges = set().union(top_bulk, bottom_bulk)
+    all_point_edges = set().union(top_points, bottom_points)
+    apply_aa_mask(img, all_bulk_edges, base_color[:3], stronger=False)
+    apply_aa_mask(img, all_point_edges, base_color[:3], stronger=True)
+
+    return img
 
 def north_wall_origin(cx: int, cy_floor: int) -> Tuple[int, int]:
     """
-    Returns the screen-space origin (x, y) for the CENTER of the north wall face
-    at the floor–wall seam.
+    North wall origin at the floor–wall seam.
+    The seam is the top vertex of the floor diamond.
     """
-    ox = cx + (TILE_W // 4) * 2 // 2  # effectively cx + half tile width (32)
-    oy = cy_floor - WALL_N_BASE_CY_OFFSET
-    return ox, oy
+    seam_offset = TILE_W // 4
+    return cx, cy_floor - seam_offset
 
 
-def project_wall_n(local_x: float, z_px: float, ox: int, oy: int) -> Tuple[int, int]:
+
+def project_wall_n_horizontal(local_x: float, z_px: float, ox: int, oy: int) -> Tuple[int, int]:
     """
-    North wall projection from wall-local coordinates.
-
-    local_x:
-      horizontal distance along the north wall face
-      (negative = left, positive = right)
-
-    z_px:
-      vertical distance upward from the floor–wall seam
+    Project a horizontal pipe on the north wall.
+    This follows the diagonal face of the wall.
     """
     sx = ox + local_x
     sy = oy + (local_x // 2) - z_px
     return int(sx), int(sy)
 
 
-def render_floor(job: RenderJob, base_color: Tuple[int, int, int, int], thickness: int) -> Image.Image:
+def project_wall_n_vertical(z_px: float, ox: int, oy: int) -> Tuple[int, int]:
     """
-    Full floor rendering (unchanged, shading-enabled).
+    Project a vertical pipe on the north wall.
+    Vertical pipes rise straight up from the wall–floor seam.
     """
-    img = Image.new("RGBA", (TILE_W, TILE_H), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-
-    half = TILE_W // 4
-
-    segments = []
-
-    if job.shape == "straight":
-        if job.variant == "EW":
-            segments = [(-half, 0, half, 0)]
-        else:
-            segments = [(0, -half, 0, half)]
-
-    for x1, y1, x2, y2 in segments:
-        p1 = iso_project_floor(x1, y1, FLOOR_CX, FLOOR_CY)
-        p2 = iso_project_floor(x2, y2, FLOOR_CX, FLOOR_CY)
-        draw.line([p1, p2], fill=base_color, width=thickness)
-
-    # NOTE: Full shading pipeline omitted here for brevity in this refactor.
-    # It remains unchanged from your working version.
-
-    return img
+    sx = ox
+    sy = oy - z_px
+    return int(sx), int(sy)
 
 
 def render_wall_n_straight(job: RenderJob, base_color: Tuple[int, int, int, int], thickness: int) -> Image.Image:
@@ -495,21 +594,60 @@ def render_wall_n_straight(job: RenderJob, base_color: Tuple[int, int, int, int]
     half = TILE_W // 4
 
     if job.variant == "EW":
-        z = WALL_PIPE_Z_PX
-        p1 = project_wall_n(-half, z, ox, oy)
-        p2 = project_wall_n(half, z, ox, oy)
-        draw.line([p1, p2], fill=base_color, width=thickness)
+        # North-wall horizontal pipe:
+        # floor-projected, diagonal, raised to center of cube index 1
+
+        half = TILE_W // 4          # 32px
+        half_w = thickness // 2
+
+        # Lift to center of second cube (cube index 1)
+        z_lift_px = WALL_CUBE_PX + (WALL_CUBE_PX // 2)   # 96px
+
+        # World-space base at center of north face on floor plane
+        x1, y1 = -half, -half
+        x2, y2 = +half, -half
+
+        for dy in range(-half_w, -half_w + thickness):
+            p1 = iso_project_floor(x1, y1, FLOOR_CX, FLOOR_CY)
+            p2 = iso_project_floor(x2, y2, FLOOR_CX, FLOOR_CY)
+
+            # apply thickness offset AND vertical lift
+            p1 = (p1[0], p1[1] + dy - z_lift_px)
+            p2 = (p2[0], p2[1] + dy - z_lift_px)
+
+            draw.line([p1, p2], fill=base_color, width=1)
 
     elif job.variant == "NS":
-        p1 = project_wall_n(0, 0, ox, oy)
-        p2 = project_wall_n(0, WALL_HEIGHT_PX, ox, oy)
-        draw.line([p1, p2], fill=base_color, width=thickness)
+        # North-wall vertical pipe is a FLOOR-RESTING object
+        # Positioned at the center of the north face on the floor plane
+
+        half = TILE_W // 4          # 32 for 128px tiles
+        half_w = thickness // 2
+
+        # Base position on the floor: (x=0, y=-half)
+        base_x, base_y = iso_project_floor(0, -half, FLOOR_CX, FLOOR_CY)
+
+        # Vertical extent (how tall the pipe rises visually)
+        pipe_height_px = WALL_HEIGHT_PX
+
+        for dx in range(-half_w, -half_w + thickness):
+            p1 = (base_x + dx, base_y)
+            p2 = (base_x + dx, base_y - pipe_height_px)
+            draw.line([p1, p2], fill=base_color, width=1)
 
     else:
         raise NotImplementedError(job.variant)
 
     return img
 
+def iso_project_floor(x: float, y: float, cx: int, cy: int) -> Tuple[int, int]:
+    """
+    Project floor-local coordinates (x, y) into screen space
+    using standard 2:1 isometric projection.
+    """
+    sx = cx + (x - y)
+    sy = cy + (x + y) // 2
+    return int(sx), int(sy)
 
 def render(job: RenderJob, geometry: dict, pipe_sets: dict) -> Image.Image:
     pipe_set = pipe_sets[job.pipe_set]
