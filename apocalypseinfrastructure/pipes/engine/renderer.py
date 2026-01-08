@@ -86,6 +86,14 @@ class RunDir(Enum):
 
 
 # ============================================================
+# EdgeSide enum (LIGHT/DARK)
+# ============================================================
+class EdgeSide(Enum):
+    LIGHT = auto()
+    DARK = auto()
+
+
+# ============================================================
 # Rendering constants
 # ============================================================
 
@@ -103,9 +111,158 @@ WALL_HEIGHT_PX = WALL_CUBE_PX * 3
 # Debug controls
 # ============================================================
 
+
 # When True: output classification debug colors (very visible).
 # When False: output base geometry only (still emits intent, but no debug recolor).
 DEBUG_CLASSIFICATION = True
+
+# When True: apply real shading for floor straights
+ENABLE_FLOOR_SHADING = True
+# ============================================================
+# Simple shading helpers (floor-only)
+# ============================================================
+
+def darken(px, x, y, amount):
+    r, g, b, a = px[x, y]
+    px[x, y] = (
+        max(0, int(r * (1 - amount))),
+        max(0, int(g * (1 - amount))),
+        max(0, int(b * (1 - amount))),
+        a,
+    )
+
+
+def lighten(px, x, y, amount):
+    r, g, b, a = px[x, y]
+    px[x, y] = (
+        min(255, int(r + (255 - r) * amount)),
+        min(255, int(g + (255 - g) * amount)),
+        min(255, int(b + (255 - b) * amount)),
+        a,
+    )
+
+# ============================================================
+# Alpha-blend overlay helpers (non-destructive overlays)
+# ============================================================
+
+def alpha_overlay(px, x, y, overlay_rgb, alpha):
+    """
+    Alpha-blend an overlay color onto the pixel.
+    alpha in range [0.0, 1.0]
+    """
+    r, g, b, a = px[x, y]
+    or_, og, ob = overlay_rgb
+
+    px[x, y] = (
+        int(r * (1 - alpha) + or_ * alpha),
+        int(g * (1 - alpha) + og * alpha),
+        int(b * (1 - alpha) + ob * alpha),
+        a,
+    )
+
+
+def shadow_overlay(px, x, y, alpha):
+    alpha_overlay(px, x, y, (0, 0, 0), alpha)
+
+
+def light_overlay(px, x, y, alpha):
+    alpha_overlay(px, x, y, (255, 255, 255), alpha)
+
+
+# ============================================================
+# Floor straight shading helper: Layer 1 shadow band
+# ============================================================
+def shadow_band_inward(px, x, y, dx, dy):
+    # Step 1: very dark edge
+    shadow_overlay(px, x, y, 0.45)
+
+    # Step 2: strong shadow
+    x1, y1 = x + dx, y + dy
+    if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H:
+        shadow_overlay(px, x1, y1, 0.30)
+
+    # Step 3: soft shadow
+    x2, y2 = x + 2*dx, y + 2*dy
+    if 0 <= x2 < TILE_W and 0 <= y2 < TILE_H:
+        shadow_overlay(px, x2, y2, 0.18)
+
+    # Step 4: almost transparent tail
+    x3, y3 = x + 3*dx, y + 3*dy
+    if 0 <= x3 < TILE_W and 0 <= y3 < TILE_H:
+        shadow_overlay(px, x3, y3, 0.07)
+
+# ============================================================
+# Floor straight shading helper: Layer 1 light rim band
+# ============================================================
+def light_band_inward(px, x, y, dx, dy):
+    # Edge
+    light_overlay(px, x, y, 0.35)
+
+    # First inward
+    x1, y1 = x + dx, y + dy
+    if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H:
+        light_overlay(px, x1, y1, 0.18)
+
+    # Second inward
+    x2, y2 = x + 2*dx, y + 2*dy
+    if 0 <= x2 < TILE_W and 0 <= y2 < TILE_H:
+        light_overlay(px, x2, y2, 0.08)
+
+# ============================================================
+# Floor straight shading helper: Old light-facing point highlight
+# ============================================================
+def light_point_highlight(px, x, y, dx, dy):
+    """
+    Old light-facing point highlight:
+    - white alpha at the point
+    - softer white alpha one pixel inward
+    """
+    # Strong highlight at the point
+    light_overlay(px, x, y, 0.45)
+
+    # Softer highlight just inward
+    x1, y1 = x + dx, y + dy
+    if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H:
+        light_overlay(px, x1, y1, 0.18)
+
+
+
+# ============================================================
+# Floor straight shading helper: DEBUG solid red overlay
+# ============================================================
+def red_debug_overlay(px, x, y):
+    """
+    DEBUG: paint solid red to prove execution and placement.
+    """
+    px[x, y] = (255, 0, 0, 255)
+
+
+# ============================================================
+# Floor straight shading helper: Black glow along scanline (point-driven)
+# ============================================================
+def shadow_overlay_force_alpha(px, x, y, alpha):
+    """
+    Black overlay that FORCES alpha > 0.
+    Used only for glow outside the shape.
+    """
+    r, g, b, _ = px[x, y]
+    px[x, y] = (
+        int(r * (1 - alpha)),
+        int(g * (1 - alpha)),
+        int(b * (1 - alpha)),
+        int(255 * alpha),
+    )
+
+def black_glow_scanline(px, x, y, dx, dy):
+    # First pixel (stronger)
+    x1, y1 = x + dx, y + dy
+    if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H:
+        shadow_overlay_force_alpha(px, x1, y1, 0.44)
+
+    # Second pixel (softer)
+    x2, y2 = x + 2*dx, y + 2*dy
+    if 0 <= x2 < TILE_W and 0 <= y2 < TILE_H:
+        shadow_overlay_force_alpha(px, x2, y2, .28)
 
 
 # ============================================================
@@ -229,31 +386,32 @@ def neighbor_offsets_for_run(run_dir: RunDir):
       perp_offsets  -> neighbors perpendicular to the run (silhouette)
     """
     if run_dir == RunDir.ISO_X:
-        # diagonal run, scan horizontally, silhouette is vertical
+        # diagonal EW run, silhouette is vertical (up/down)
         return ((-1, 0), (1, 0)), ((0, -1), (0, 1))
     if run_dir == RunDir.ISO_Y:
-        # other diagonal run, scan horizontally, silhouette is vertical
-        return ((-1, 0), (1, 0)), ((0, -1), (0, 1))
+        # diagonal NS run, silhouette is horizontal (left/right)
+        return ((-1, 0), (1, 0)), ((-1, 0), (1, 0))
     else:  # ISO_Z
-        # vertical riser, scan vertically, silhouette is horizontal
+        # vertical riser, silhouette is horizontal
         return ((0, -1), (0, 1)), ((-1, 0), (1, 0))
 
 
 def classify_per_run(
     img: Image.Image,
     run_map: Dict[Tuple[int, int], Set[RunDir]],
-) -> Dict[Tuple[int, int], Dict[RunDir, Dict[str, bool]]]:
+) -> Dict[Tuple[int, int], Dict[RunDir, dict]]:
     """
     Per pixel, per RunDir flags:
 
     flags[(x,y)][RunDir] = {
         "edge_scan": True/False,   # run boundary
         "edge_perp": True/False,   # silhouette edge
+        "edge_side": EdgeSide or None, # LIGHT/DARK if edge_perp else None
         "point": True/False        # special case of edge_scan
     }
     """
     px = img.load()
-    flags: Dict[Tuple[int, int], Dict[RunDir, Dict[str, bool]]] = {}
+    flags: Dict[Tuple[int, int], Dict[RunDir, dict]] = {}
 
     for (x, y), dirs in run_map.items():
         flags[(x, y)] = {}
@@ -278,13 +436,26 @@ def classify_per_run(
             edge_scan = not (s1 and s2)
             point = edge_scan and (not s1 or not s2)
 
-            # Perpendicular silhouette edge:
-            # bulk pixels are STILL edges if they touch transparency
             edge_perp = not (p1 and p2)
+            edge_side = None
+
+            if edge_perp:
+                # LIGHT/DARK determined by which side is exposed to air
+                # pX == False means transparent (exposed)
+                if rd == RunDir.ISO_X:
+                    # upper side (perp1) exposed → LIGHT
+                    edge_side = EdgeSide.LIGHT if not p1 else EdgeSide.DARK
+                elif rd == RunDir.ISO_Y:
+                    # left side (perp1) exposed → LIGHT
+                    edge_side = EdgeSide.LIGHT if not p1 else EdgeSide.DARK
+                elif rd == RunDir.ISO_Z:
+                    # left side (perp1) exposed → LIGHT
+                    edge_side = EdgeSide.LIGHT if not p1 else EdgeSide.DARK
 
             flags[(x, y)][rd] = {
                 "edge_scan": edge_scan,
                 "edge_perp": edge_perp,
+                "edge_side": edge_side,
                 "point": point,
             }
 
@@ -302,17 +473,17 @@ def compute_effective_bulk(
     Returns pixels that are true BULK INTERIOR.
 
     A pixel is bulk interior if:
-    1) It has >=2 RunDirs AND does not touch transparency, OR
-    2) It is fully enclosed by solid neighbors whose combined RunDirs >=2
+    1) It has >=2 RunDirs AND does NOT touch transparency, OR
+    2) It is fully enclosed (4-neighborhood) by solid pixels whose
+       combined RunDirs >= 2 (topological junction fill).
 
-    This second rule performs a minimal topological fill at true junctions
-    (e.g. diagonal crosses) without smearing bulk outward.
+    This closes diagonal raster gaps without smearing bulk outward.
     """
     px = img.load()
-    bulk_pixels = set()
+    bulk_pixels: Set[Tuple[int, int]] = set()
 
     for (x, y), dirs in run_map.items():
-        # ---- Rule 1: direct overlap, fully solid ----
+        # ---- Rule 1: direct overlap, strict interior ----
         if len(dirs) >= 2:
             touches_transparent = False
             for dx, dy in ((-1,0), (1,0), (0,-1), (0,1)):
@@ -323,15 +494,13 @@ def compute_effective_bulk(
                 if not _opaque(px, nx, ny):
                     touches_transparent = True
                     break
-
             if not touches_transparent:
                 bulk_pixels.add((x, y))
                 continue
 
         # ---- Rule 2: enclosed junction fill ----
-        neighbor_dirs = set()
         enclosed = True
-
+        neighbor_dirs: Set[RunDir] = set()
         for dx, dy in ((-1,0), (1,0), (0,-1), (0,1)):
             nx, ny = x + dx, y + dy
             if not (0 <= nx < TILE_W and 0 <= ny < TILE_H):
@@ -396,6 +565,7 @@ def compute_bulk_adjacent_edge(
 # Debug coloring
 # ============================================================
 
+
 def debug_color_for_pixel(
     dirs: Set[RunDir],
     per_run_flags: Dict[RunDir, Dict[str, bool]],
@@ -435,6 +605,66 @@ def debug_color_for_pixel(
 
     # Interior
     return (64, 64, 64, 255)
+
+
+# ============================================================
+# Classification image builder (debug visualization)
+# ============================================================
+def build_classification_image(
+    run_map: Dict[Tuple[int, int], Set[RunDir]],
+    per_run_flags: Dict[Tuple[int, int], Dict[RunDir, Dict[str, bool]]],
+    effective_bulk: Set[Tuple[int, int]],
+    bulk_adjacent_edge: Set[Tuple[int, int]],
+) -> Image.Image:
+    """
+    Build a fresh RGBA image visualizing classification.
+    This NEVER mutates the shaded render.
+    """
+    cls_img = Image.new("RGBA", (TILE_W, TILE_H), (0, 0, 0, 0))
+    px = cls_img.load()
+
+    for (x, y), dirs in run_map.items():
+        if not dirs:
+            continue
+
+        # 1. True bulk interior
+        if (x, y) in effective_bulk and (x, y) not in bulk_adjacent_edge:
+            px[x, y] = (255, 255, 255, 255)
+
+        # 2. Bulk edge
+        elif (x, y) in effective_bulk and (x, y) in bulk_adjacent_edge:
+            px[x, y] = (220, 220, 220, 255)
+
+        # 3. Non-bulk bulk-adjacent edge
+        elif (x, y) in bulk_adjacent_edge:
+            px[x, y] = (200, 200, 200, 255)
+
+        # 4. Normal classification with edge_side OVERLAY
+        else:
+            flags = per_run_flags.get((x, y), {})
+
+            # Base classification color (unchanged)
+            base_color = debug_color_for_pixel(dirs, flags)
+            r, g, b, a = base_color
+
+            # Overlay edge_side if this is a silhouette edge
+            for rd, f in flags.items():
+                if f.get("edge_perp") and f.get("edge_side") is not None:
+                    if f["edge_side"] == EdgeSide.LIGHT:
+                        # LIGHT edge overlay: yellow tint
+                        r = min(255, int(r * 0.5 + 255 * 0.5))
+                        g = min(255, int(g * 0.5 + 255 * 0.5))
+                        b = int(b * 0.5)
+                    else:
+                        # DARK edge overlay: black tint
+                        r = int(r * 0.3)
+                        g = int(g * 0.3)
+                        b = int(b * 0.3)
+                    break
+
+            px[x, y] = (r, g, b, a)
+
+    return cls_img
 
 
 # ============================================================
@@ -651,29 +881,71 @@ def render(job: RenderJob, geometry: dict, pipe_sets: dict) -> Image.Image:
     # ---------------- Classification ----------------
     per_run_flags = classify_per_run(img, run_map)
 
-    # ---------------- Debug output ----------------
-    if DEBUG_CLASSIFICATION:
+    # ---------------- Floor shading: EDGE-POINT SHADOW + LIGHT (ALL SHAPES) ----------------
+    if ENABLE_FLOOR_SHADING and job.surface == "floor":
         px = img.load()
-        # Compute "effective bulk" pixels (handles 1-pixel rasterization gaps at intersections)
-        effective_bulk = compute_effective_bulk(img, run_map)
-        # Compute bulk-adjacent edge pixels (silhouette boundary around bulk mass)
-        bulk_adjacent_edge = compute_bulk_adjacent_edge(img, run_map, effective_bulk)
-        # Clear image and repaint with debug colors for all solid pixels in run_map
-        for (x, y), dirs in run_map.items():
-            if not dirs:
-                continue
 
-            # 1. True interior bulk
-            if (x, y) in effective_bulk and (x, y) not in bulk_adjacent_edge:
-                px[x, y] = (255, 255, 255, 255)  # BULK interior
-            # 2. Bulk that is also an edge (touches transparency)
-            elif (x, y) in effective_bulk and (x, y) in bulk_adjacent_edge:
-                px[x, y] = (220, 220, 220, 255)  # BULK EDGE (lighter gray)
-            # 3. Non-bulk bulk-adjacent edge
-            elif (x, y) in bulk_adjacent_edge:
-                px[x, y] = (200, 200, 200, 255)
-            # 4. Normal edge/point classification
-            else:
-                px[x, y] = debug_color_for_pixel(dirs, per_run_flags.get((x, y), {}))
+        for (x, y), flags in per_run_flags.items():
+            for rd, f in flags.items():
+                # Only silhouette EDGE POINTS participate
+                if not f.get("edge_perp"):
+                    continue
+                if not f.get("point"):
+                    continue
+
+                # Determine inward direction ALONG THE SCANLINE (old behavior)
+                (scan1, scan2), _ = neighbor_offsets_for_run(rd)
+
+                # Choose the scan direction that stays inside the shape
+                x1, y1 = x + scan1[0], y + scan1[1]
+                if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H and _opaque(px, x1, y1):
+                    dx, dy = scan1
+                else:
+                    dx, dy = scan2
+
+                if f.get("edge_side") == EdgeSide.DARK:
+                    shadow_band_inward(px, x, y, dx, dy)
+                elif f.get("edge_side") == EdgeSide.LIGHT:
+                    light_point_highlight(px, x, y, dx, dy)
+
+                break  # once per pixel
+
+
+
+    # ---------------- Floor shading: POINT-DRIVEN BLACK GLOW (ALL SHAPES) ----------------
+    if ENABLE_FLOOR_SHADING and job.surface == "floor":
+        px = img.load()
+
+        for (x, y), flags in per_run_flags.items():
+            for rd, f in flags.items():
+                if not f.get("edge_perp"):
+                    continue
+                if not f.get("point"):
+                    continue
+
+                # Scanline directions for this run
+                (scan1, scan2), _ = neighbor_offsets_for_run(rd)
+
+                # Determine OUTWARD scan direction(s)
+                for dx, dy in (scan1, scan2):
+                    nx, ny = x + dx, y + dy
+                    if not (0 <= nx < TILE_W and 0 <= ny < TILE_H and _opaque(px, nx, ny)):
+                        # dx,dy points OUTSIDE the shape
+                        black_glow_scanline(px, x, y, dx, dy)
+
+                break  # once per pixel
+
+
+    # ---------------- Classification debug image (separate) ----------------
+    if DEBUG_CLASSIFICATION:
+        effective_bulk = compute_effective_bulk(img, run_map)
+        bulk_adjacent_edge = compute_bulk_adjacent_edge(img, run_map, effective_bulk)   
+        cls_img = build_classification_image(
+            run_map,
+            per_run_flags,
+            effective_bulk,
+            bulk_adjacent_edge,
+        )
+        img._classification = cls_img  # attach for exporter
 
     return img

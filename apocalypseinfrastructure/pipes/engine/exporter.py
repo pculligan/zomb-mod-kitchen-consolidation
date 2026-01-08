@@ -10,6 +10,9 @@ from pathlib import Path
 
 from engine.renderer import RenderJob, render
 
+# --- Classification output root ---
+CLASSIFICATION_OUT_DIR = Path("pipes/generated") / "classification"
+
 
 def sprite_filename(job: RenderJob) -> str:
     """
@@ -49,3 +52,21 @@ def export_sprite(
 
     img.save(out_path)
     print(f"✓ wrote {out_path}")
+
+    # --- Always-on classification output ---
+    from engine.renderer import DEBUG_CLASSIFICATION
+
+    if DEBUG_CLASSIFICATION:
+        cls_path = CLASSIFICATION_OUT_DIR / job.surface
+        cls_path.mkdir(parents=True, exist_ok=True)
+
+        cls_file = cls_path / sprite_filename(job)
+        img._classification.save(cls_file)
+
+        readme = CLASSIFICATION_OUT_DIR / "README.txt"
+        if not readme.exists():
+            readme.write_text(
+                "Classification debug output.\n"
+                "Colors encode RunDir / edge / point / bulk taxonomy.\n"
+                "These images are diagnostics, not game assets.\n"
+            )
