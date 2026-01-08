@@ -1,71 +1,30 @@
 
-"""
-renderer.py — Intent-first classification milestone
-
-GOAL OF THIS FILE
-=================
-We are explicitly NOT doing "clever shading" here.
-
-We are refactoring the renderer so that the *classification model* is correct,
-stable, and understandable. Once classification is trustworthy, we can plug
-our proven shading masks back in.
-
-CLASSIFICATION HIERARCHY (LOCKED)
-=================================
-
-Level 0: Solid vs Transparent
------------------------------
-- Everything below applies only to SOLID pixels (alpha > 0).
-
-Level 1: RunDir membership (INTENT)
------------------------------------
-- A solid pixel may belong to one or more directional shape layers.
-- This is emitted during geometry drawing (no inference from neighbors).
-
-RunDir ∈ { ISO_X, ISO_Y, ISO_Z }
-- ISO_X: isometric east–west run (diagonal on screen for floors)
-- ISO_Y: isometric north–south run (other diagonal on screen for floors)
-- ISO_Z: vertical riser (screen-vertical)
-
-Level 2: Edge vs Interior (PER RunDir)
---------------------------------------
-For a given pixel and a given RunDir that the pixel participates in:
-
-- Interior: solid with solid neighbors on BOTH sides of the scan axis for that RunDir
-- Edge:     solid with transparency on at least one side of that scan axis
-
-Level 3: Point (SPECIAL CASE of Edge, PER RunDir)
--------------------------------------------------
-For a given pixel and RunDir:
-
-- Point: an Edge pixel that is also a *run boundary* along the scan direction
-         (i.e., at least one of the immediate neighbors along the scan axis is transparent)
-
-This matches the original, scanline-transition definition:
-- first solid after transparent OR last solid before transparent
-
-Level 4: Bulk (ORTHOGONAL OVERLAY)
-----------------------------------
-Bulk is NOT "interior of a long run".
-Bulk is NOT "not-a-point".
-
-Bulk = pixel participates in more than one RunDir (overlap / junction mass)
-    bulk := len(run_dirs[pixel]) > 1
-
-WHY DEBUG COLORS
-================
-We will now output an intentionally loud debug image so we can SEE:
-
-- Which pixels belong to which RunDir
-- Which pixels are edges for that RunDir
-- Which edge pixels are points
-- Which pixels are bulk (overlap) / junction mass
-
-Only after this is correct do we restore the final shading system.
-
-"""
-
 from __future__ import annotations
+
+"""
+renderer.py — practical sprite renderer
+
+Goal: produce usable pipe sprites for Project Zomboid without hand pixel work.
+
+Model:
+- Three run directions in isometric basis:
+    ISO_X : screen step (+1,+1)
+    ISO_Y : screen step (-1,+1)
+    ISO_Z : screen step ( 0,+1)  (vertical riser direction in screen space; we draw up by subtracting y)
+- Geometry emits RunDir intent via a mask so overlaps are truthful.
+- Classification is per (pixel, RunDir):
+    edge_scan: run boundary along run axis
+    point: special case of edge_scan
+    edge_perp: silhouette edge perpendicular to run axis
+    edge_side: LIGHT/DARK derived from which exposed perp side points toward global light (-1,-1)
+- Shading is point-driven and uses only classification outputs (no guessing):
+    DARK edge points -> 4-step shadow band inward along run axis
+    LIGHT edge points -> 2-step highlight inward along run axis
+    point glow -> 2-step black glow outward along run axis (both ends), force alpha
+
+Debug:
+- If DEBUG_CLASSIFICATION is True, we attach img._classification for exporter.
+"""
 
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -76,7 +35,7 @@ from PIL import Image, ImageDraw
 
 
 # ============================================================
-# Intent enums (global)
+# Enums / constants
 # ============================================================
 
 class RunDir(Enum):
@@ -85,17 +44,10 @@ class RunDir(Enum):
     ISO_Z = auto()
 
 
-# ============================================================
-# EdgeSide enum (LIGHT/DARK)
-# ============================================================
 class EdgeSide(Enum):
     LIGHT = auto()
     DARK = auto()
 
-
-# ============================================================
-# Rendering constants
-# ============================================================
 
 TILE_W = 128
 TILE_H = 256
@@ -106,53 +58,55 @@ FLOOR_CY = TILE_H - 33
 WALL_CUBE_PX = TILE_W // 2
 WALL_HEIGHT_PX = WALL_CUBE_PX * 3
 
-
-# ============================================================
-# Debug controls
-# ============================================================
-
-
-# When True: output classification debug colors (very visible).
-# When False: output base geometry only (still emits intent, but no debug recolor).
 DEBUG_CLASSIFICATION = True
+ENABLE_SHADING = True
 
-# When True: apply real shading for floor straights
-ENABLE_FLOOR_SHADING = True
+
+# Screen-space light direction (up-left)
+LIGHT_VEC = (-1, -1)
+
+
 # ============================================================
-# Simple shading helpers (floor-only)
+# Small helpers
 # ============================================================
 
-def darken(px, x, y, amount):
-    r, g, b, a = px[x, y]
-    px[x, y] = (
-        max(0, int(r * (1 - amount))),
-        max(0, int(g * (1 - amount))),
-        max(0, int(b * (1 - amount))),
-        a,
+def _opaque(px, x: int, y: int) -> bool:
+    return px[x, y][3] > 0
+
+
+def iso_project_floor(x: float, y: float) -> Tuple[int, int]:
+    return (
+        int(FLOOR_CX + (x - y)),
+        int(FLOOR_CY + (x + y) // 2),
     )
 
 
-def lighten(px, x, y, amount):
-    r, g, b, a = px[x, y]
-    px[x, y] = (
-        min(255, int(r + (255 - r) * amount)),
-        min(255, int(g + (255 - g) * amount)),
-        min(255, int(b + (255 - b) * amount)),
-        a,
-    )
+def run_vec(rd: RunDir) -> Tuple[int, int]:
+    # screen-space direction of the run
+    if rd == RunDir.ISO_X:
+        return (1, 1)
+    if rd == RunDir.ISO_Y:
+        return (-1, 1)
+    # ISO_Z: vertical in screen space
+    return (0, 1)
+
+
+def perp_vecs(vx: int, vy: int) -> Tuple[Tuple[int, int], Tuple[int, int]]:
+    # 90° rotations in screen space
+    return ((-vy, vx), (vy, -vx))
+
+
+def dot(a: Tuple[int, int], b: Tuple[int, int]) -> int:
+    return a[0] * b[0] + a[1] * b[1]
+
 
 # ============================================================
-# Alpha-blend overlay helpers (non-destructive overlays)
+# Alpha overlays
 # ============================================================
 
 def alpha_overlay(px, x, y, overlay_rgb, alpha):
-    """
-    Alpha-blend an overlay color onto the pixel.
-    alpha in range [0.0, 1.0]
-    """
     r, g, b, a = px[x, y]
     or_, og, ob = overlay_rgb
-
     px[x, y] = (
         int(r * (1 - alpha) + or_ * alpha),
         int(g * (1 - alpha) + og * alpha),
@@ -169,82 +123,8 @@ def light_overlay(px, x, y, alpha):
     alpha_overlay(px, x, y, (255, 255, 255), alpha)
 
 
-# ============================================================
-# Floor straight shading helper: Layer 1 shadow band
-# ============================================================
-def shadow_band_inward(px, x, y, dx, dy):
-    # Step 1: very dark edge
-    shadow_overlay(px, x, y, 0.45)
-
-    # Step 2: strong shadow
-    x1, y1 = x + dx, y + dy
-    if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H:
-        shadow_overlay(px, x1, y1, 0.30)
-
-    # Step 3: soft shadow
-    x2, y2 = x + 2*dx, y + 2*dy
-    if 0 <= x2 < TILE_W and 0 <= y2 < TILE_H:
-        shadow_overlay(px, x2, y2, 0.18)
-
-    # Step 4: almost transparent tail
-    x3, y3 = x + 3*dx, y + 3*dy
-    if 0 <= x3 < TILE_W and 0 <= y3 < TILE_H:
-        shadow_overlay(px, x3, y3, 0.07)
-
-# ============================================================
-# Floor straight shading helper: Layer 1 light rim band
-# ============================================================
-def light_band_inward(px, x, y, dx, dy):
-    # Edge
-    light_overlay(px, x, y, 0.35)
-
-    # First inward
-    x1, y1 = x + dx, y + dy
-    if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H:
-        light_overlay(px, x1, y1, 0.18)
-
-    # Second inward
-    x2, y2 = x + 2*dx, y + 2*dy
-    if 0 <= x2 < TILE_W and 0 <= y2 < TILE_H:
-        light_overlay(px, x2, y2, 0.08)
-
-# ============================================================
-# Floor straight shading helper: Old light-facing point highlight
-# ============================================================
-def light_point_highlight(px, x, y, dx, dy):
-    """
-    Old light-facing point highlight:
-    - white alpha at the point
-    - softer white alpha one pixel inward
-    """
-    # Strong highlight at the point
-    light_overlay(px, x, y, 0.45)
-
-    # Softer highlight just inward
-    x1, y1 = x + dx, y + dy
-    if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H:
-        light_overlay(px, x1, y1, 0.18)
-
-
-
-# ============================================================
-# Floor straight shading helper: DEBUG solid red overlay
-# ============================================================
-def red_debug_overlay(px, x, y):
-    """
-    DEBUG: paint solid red to prove execution and placement.
-    """
-    px[x, y] = (255, 0, 0, 255)
-
-
-# ============================================================
-# Floor straight shading helper: Black glow along scanline (point-driven)
-# ============================================================
 def shadow_overlay_force_alpha(px, x, y, alpha):
-    """
-    Black overlay that FORCES alpha > 0.
-    Used only for glow outside the shape.
-    """
+    # outside the shape pixels have a=0; force alpha so the glow is visible
     r, g, b, _ = px[x, y]
     px[x, y] = (
         int(r * (1 - alpha)),
@@ -253,58 +133,14 @@ def shadow_overlay_force_alpha(px, x, y, alpha):
         int(255 * alpha),
     )
 
-def black_glow_scanline(px, x, y, dx, dy):
-    # First pixel (stronger)
-    x1, y1 = x + dx, y + dy
-    if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H:
-        shadow_overlay_force_alpha(px, x1, y1, 0.44)
-
-    # Second pixel (softer)
-    x2, y2 = x + 2*dx, y + 2*dy
-    if 0 <= x2 < TILE_W and 0 <= y2 < TILE_H:
-        shadow_overlay_force_alpha(px, x2, y2, .28)
-
 
 # ============================================================
-# Helpers
+# Intent emission (mask-based)
 # ============================================================
 
-def _opaque(px, x: int, y: int) -> bool:
-    return px[x, y][3] > 0
-
-
-def iso_project_floor(x: float, y: float) -> Tuple[int, int]:
-    """
-    Standard 2:1 isometric projection for floor plane.
-    """
-    return (
-        int(FLOOR_CX + (x - y)),
-        int(FLOOR_CY + (x + y) // 2),
-    )
-
-
-def clamp(v: int) -> int:
-    return 0 if v < 0 else 255 if v > 255 else v
-
-
-# ============================================================
-# Geometry emission WITH intent
-# ============================================================
-
-
-# ============================================================
-# Mask-based intent emission helper
-# ============================================================
-
-def emit_run_dir_from_mask(
-    mask: Image.Image,
-    run_map: DefaultDict[Tuple[int, int], Set[RunDir]],
-    run_dir: RunDir,
-) -> None:
-    """
-    Assign RunDir to ALL pixels painted by this stroke,
-    regardless of whether they were previously opaque.
-    """
+def emit_run_dir_from_mask(mask: Image.Image,
+                           run_map: DefaultDict[Tuple[int, int], Set[RunDir]],
+                           run_dir: RunDir) -> None:
     px = mask.load()
     for y in range(TILE_H):
         for x in range(TILE_W):
@@ -312,117 +148,73 @@ def emit_run_dir_from_mask(
                 run_map[(x, y)].add(run_dir)
 
 
-def draw_floor_stroke_with_intent(
-    img: Image.Image,
-    run_map: DefaultDict[Tuple[int, int], Set[RunDir]],
-    p1: Tuple[int, int],
-    p2: Tuple[int, int],
-    *,
-    thickness: int,
-    run_dir: RunDir,
-    color: Tuple[int, int, int, int],
-) -> None:
-    # Draw into the main image
-    draw = ImageDraw.Draw(img)
-    draw.line([p1, p2], fill=color, width=thickness)
-
-    # Draw into a temporary mask to capture stroke coverage
-    mask = Image.new("RGBA", (TILE_W, TILE_H), (0, 0, 0, 0))
-    mdraw = ImageDraw.Draw(mask)
-    mdraw.line([p1, p2], fill=(255, 255, 255, 255), width=thickness)
-
-    emit_run_dir_from_mask(mask, run_map, run_dir)
-
-
-def draw_wall_multiline_with_intent(
-    img: Image.Image,
-    run_map: DefaultDict[Tuple[int, int], Set[RunDir]],
-    p1: Tuple[int, int],
-    p2: Tuple[int, int],
-    *,
-    thickness: int,
-    run_dir: RunDir,
-    color: Tuple[int, int, int, int],
-    offset_axis: str,
-) -> None:
+def draw_stroke_with_intent(img: Image.Image,
+                            run_map: DefaultDict[Tuple[int, int], Set[RunDir]],
+                            p1: Tuple[int, int],
+                            p2: Tuple[int, int],
+                            *,
+                            width: int,
+                            run_dir: RunDir,
+                            color: Tuple[int, int, int, int],
+                            mode: str) -> None:
     """
-    Walls: deterministic rasterization (N parallel 1px strokes).
-    offset_axis:
-      - "x" for vertical risers (perpendicular is horizontal)
-      - "y" for diagonal wall runs (perpendicular is vertical)
+    mode:
+      - "floor": Pillow width stroke (best caps)
+      - "wall": deterministic multiline (stable)
     """
     draw = ImageDraw.Draw(img)
-    half = thickness // 2
 
-    if offset_axis == "x":
-        for dx in range(-half, -half + thickness):
-            draw.line([(p1[0] + dx, p1[1]), (p2[0] + dx, p2[1])], fill=color, width=1)
+    if mode == "floor":
+        draw.line([p1, p2], fill=color, width=width)
+        mask = Image.new("RGBA", (TILE_W, TILE_H), (0, 0, 0, 0))
+        mdraw = ImageDraw.Draw(mask)
+        mdraw.line([p1, p2], fill=(255, 255, 255, 255), width=width)
+        emit_run_dir_from_mask(mask, run_map, run_dir)
+        return
+
+    # wall multiline
+    half = width // 2
+    # choose offset axis by run_dir: vertical riser offsets in X; diagonal offsets in Y
+    if run_dir == RunDir.ISO_Z:
+        offsets = [(dx, 0) for dx in range(-half, -half + width)]
     else:
-        for dy in range(-half, -half + thickness):
-            draw.line([(p1[0], p1[1] + dy), (p2[0], p2[1] + dy)], fill=color, width=1)
+        offsets = [(0, dy) for dy in range(-half, -half + width)]
 
-    # Draw into temp mask
+    # draw
+    for ox, oy in offsets:
+        draw.line([(p1[0] + ox, p1[1] + oy), (p2[0] + ox, p2[1] + oy)], fill=color, width=1)
+
+    # mask
     mask = Image.new("RGBA", (TILE_W, TILE_H), (0, 0, 0, 0))
     mdraw = ImageDraw.Draw(mask)
-
-    if offset_axis == "x":
-        for dx in range(-half, -half + thickness):
-            mdraw.line([(p1[0] + dx, p1[1]), (p2[0] + dx, p2[1])], fill=(255, 255, 255, 255), width=1)
-    else:
-        for dy in range(-half, -half + thickness):
-            mdraw.line([(p1[0], p1[1] + dy), (p2[0], p2[1] + dy)], fill=(255, 255, 255, 255), width=1)
+    for ox, oy in offsets:
+        mdraw.line([(p1[0] + ox, p1[1] + oy), (p2[0] + ox, p2[1] + oy)], fill=(255, 255, 255, 255), width=1)
 
     emit_run_dir_from_mask(mask, run_map, run_dir)
 
 
 # ============================================================
-# Classification (edge/point per RunDir) — uses transparency, not clever math
+# Classification
 # ============================================================
 
-def neighbor_offsets_for_run(run_dir: RunDir):
-    """
-    Returns:
-      scan_offsets  -> neighbors along the run direction
-      perp_offsets  -> neighbors perpendicular to the run (silhouette)
-    """
-    if run_dir == RunDir.ISO_X:
-        # diagonal EW run, silhouette is vertical (up/down)
-        return ((-1, 0), (1, 0)), ((0, -1), (0, 1))
-    if run_dir == RunDir.ISO_Y:
-        # diagonal NS run, silhouette is horizontal (left/right)
-        return ((-1, 0), (1, 0)), ((-1, 0), (1, 0))
-    else:  # ISO_Z
-        # vertical riser, silhouette is horizontal
-        return ((0, -1), (0, 1)), ((-1, 0), (1, 0))
-
-
-def classify_per_run(
-    img: Image.Image,
-    run_map: Dict[Tuple[int, int], Set[RunDir]],
-) -> Dict[Tuple[int, int], Dict[RunDir, dict]]:
-    """
-    Per pixel, per RunDir flags:
-
-    flags[(x,y)][RunDir] = {
-        "edge_scan": True/False,   # run boundary
-        "edge_perp": True/False,   # silhouette edge
-        "edge_side": EdgeSide or None, # LIGHT/DARK if edge_perp else None
-        "point": True/False        # special case of edge_scan
-    }
-    """
+def classify_per_run(img: Image.Image,
+                     run_map: Dict[Tuple[int, int], Set[RunDir]]) -> Dict[Tuple[int, int], Dict[RunDir, dict]]:
     px = img.load()
     flags: Dict[Tuple[int, int], Dict[RunDir, dict]] = {}
 
     for (x, y), dirs in run_map.items():
+        if not dirs:
+            continue
         flags[(x, y)] = {}
-
         for rd in dirs:
-            (scan1, scan2), (perp1, perp2) = neighbor_offsets_for_run(rd)
+            vx, vy = run_vec(rd)
+            scan1 = (vx, vy)
+            scan2 = (-vx, -vy)
+            perp1, perp2 = perp_vecs(vx, vy)
 
-            def in_run(nx, ny):
+            def in_run(nx, ny) -> bool:
                 return (
-                    0 <= nx < TILE_W and
-                    0 <= ny < TILE_H and
+                    0 <= nx < TILE_W and 0 <= ny < TILE_H and
                     _opaque(px, nx, ny) and
                     rd in run_map.get((nx, ny), set())
                 )
@@ -437,189 +229,207 @@ def classify_per_run(
             point = edge_scan and (not s1 or not s2)
 
             edge_perp = not (p1 and p2)
-            edge_side = None
 
+            edge_side = None
             if edge_perp:
-                # LIGHT/DARK determined by which side is exposed to air
-                # pX == False means transparent (exposed)
-                if rd == RunDir.ISO_X:
-                    # upper side (perp1) exposed → LIGHT
-                    edge_side = EdgeSide.LIGHT if not p1 else EdgeSide.DARK
-                elif rd == RunDir.ISO_Y:
-                    # left side (perp1) exposed → LIGHT
-                    edge_side = EdgeSide.LIGHT if not p1 else EdgeSide.DARK
-                elif rd == RunDir.ISO_Z:
-                    # left side (perp1) exposed → LIGHT
-                    edge_side = EdgeSide.LIGHT if not p1 else EdgeSide.DARK
+                # which perp side is exposed?
+                exposed = None
+                if not p1 and p2:
+                    exposed = perp1
+                elif not p2 and p1:
+                    exposed = perp2
+                # if both exposed or neither, leave None; this is rare and mostly at thin artifacts
+                if exposed is not None:
+                    # decide LIGHT/DARK by which exposed direction points more toward light vec
+                    edge_side = EdgeSide.LIGHT if dot(exposed, LIGHT_VEC) > 0 else EdgeSide.DARK
 
             flags[(x, y)][rd] = {
                 "edge_scan": edge_scan,
+                "point": point,
                 "edge_perp": edge_perp,
                 "edge_side": edge_side,
-                "point": point,
+                "scan": (scan1, scan2),
+                "perp": (perp1, perp2),
             }
 
     return flags
 
 
 # ============================================================
-# Bulk correction: 1-pixel dilation at intersections
+# Bulk helpers (for debug only; shading for bulk comes later)
 # ============================================================
-def compute_effective_bulk(
-    img: Image.Image,
-    run_map: Dict[Tuple[int, int], Set[RunDir]],
-) -> Set[Tuple[int, int]]:
+
+def compute_effective_bulk(img: Image.Image,
+                           run_map: Dict[Tuple[int, int], Set[RunDir]]) -> Set[Tuple[int, int]]:
     """
-    Returns pixels that are true BULK INTERIOR.
-
-    A pixel is bulk interior if:
-    1) It has >=2 RunDirs AND does NOT touch transparency, OR
-    2) It is fully enclosed (4-neighborhood) by solid pixels whose
-       combined RunDirs >= 2 (topological junction fill).
-
-    This closes diagonal raster gaps without smearing bulk outward.
+    Bulk interior:
+      - >=2 RunDirs and no 4-neighbor transparency
+      - OR enclosed-junction fill (4-neighbor enclosed, neighbor dirs union>=2)
     """
     px = img.load()
-    bulk_pixels: Set[Tuple[int, int]] = set()
+    bulk: Set[Tuple[int, int]] = set()
 
     for (x, y), dirs in run_map.items():
-        # ---- Rule 1: direct overlap, strict interior ----
+        # rule 1
         if len(dirs) >= 2:
-            touches_transparent = False
+            touches_air = False
             for dx, dy in ((-1,0), (1,0), (0,-1), (0,1)):
                 nx, ny = x + dx, y + dy
-                if not (0 <= nx < TILE_W and 0 <= ny < TILE_H):
-                    touches_transparent = True
+                if not (0 <= nx < TILE_W and 0 <= ny < TILE_H) or not _opaque(px, nx, ny):
+                    touches_air = True
                     break
-                if not _opaque(px, nx, ny):
-                    touches_transparent = True
-                    break
-            if not touches_transparent:
-                bulk_pixels.add((x, y))
+            if not touches_air:
+                bulk.add((x, y))
                 continue
 
-        # ---- Rule 2: enclosed junction fill ----
+        # rule 2
         enclosed = True
         neighbor_dirs: Set[RunDir] = set()
         for dx, dy in ((-1,0), (1,0), (0,-1), (0,1)):
             nx, ny = x + dx, y + dy
-            if not (0 <= nx < TILE_W and 0 <= ny < TILE_H):
-                enclosed = False
-                break
-            if not _opaque(px, nx, ny):
+            if not (0 <= nx < TILE_W and 0 <= ny < TILE_H) or not _opaque(px, nx, ny):
                 enclosed = False
                 break
             neighbor_dirs |= run_map.get((nx, ny), set())
-
         if enclosed and len(neighbor_dirs) >= 2:
-            bulk_pixels.add((x, y))
+            bulk.add((x, y))
 
-    return bulk_pixels
+    return bulk
 
-# ============================================================
-# Bulk-adjacent edge: silhouette boundary around bulk mass
-# ============================================================
-def compute_bulk_adjacent_edge(
-    img: Image.Image,
-    run_map: Dict[Tuple[int, int], Set[RunDir]],
-    bulk_pixels: Set[Tuple[int, int]],
-) -> Set[Tuple[int, int]]:
-    """
-    A pixel is a bulk-adjacent edge if:
-    - It is NOT bulk itself
-    - It is solid
-    - It is 4-neighbor adjacent to at least one bulk pixel
-    - It is 4-neighbor adjacent to at least one transparent pixel
 
-    This captures the silhouette boundary around junction mass
-    without polluting scanline edge logic.
-    """
+def compute_bulk_adjacent_edge(img: Image.Image,
+                               run_map: Dict[Tuple[int, int], Set[RunDir]],
+                               bulk_pixels: Set[Tuple[int, int]]) -> Set[Tuple[int, int]]:
     px = img.load()
-    result = set()
-
+    out: Set[Tuple[int, int]] = set()
     for (x, y), dirs in run_map.items():
-        if (x, y) in bulk_pixels:
+        if not dirs or (x, y) in bulk_pixels:
             continue
-
-        if not dirs:
-            continue
-
         adjacent_bulk = False
-        adjacent_transparent = False
-
+        adjacent_air = False
         for dx, dy in ((-1,0), (1,0), (0,-1), (0,1)):
             nx, ny = x + dx, y + dy
             if 0 <= nx < TILE_W and 0 <= ny < TILE_H:
                 if (nx, ny) in bulk_pixels:
                     adjacent_bulk = True
                 elif not _opaque(px, nx, ny):
-                    adjacent_transparent = True
-
-        if adjacent_bulk and adjacent_transparent:
-            result.add((x, y))
-
-    return result
+                    adjacent_air = True
+        if adjacent_bulk and adjacent_air:
+            out.add((x, y))
+    return out
 
 
 # ============================================================
-# Debug coloring
+# Shading operators (point-driven)
 # ============================================================
 
+def shadow_band_inward(px, x, y, dx, dy):
+    # 4-step falloff
+    shadow_overlay(px, x, y, 0.45)
+    for step, a in ((1, 0.30), (2, 0.18), (3, 0.07)):
+        xx, yy = x + step * dx, y + step * dy
+        if 0 <= xx < TILE_W and 0 <= yy < TILE_H:
+            shadow_overlay(px, xx, yy, a)
 
-def debug_color_for_pixel(
-    dirs: Set[RunDir],
-    per_run_flags: Dict[RunDir, Dict[str, bool]],
-) -> Tuple[int, int, int, int]:
-    # Bulk override ONLY for interior bulk.
-    # Edge bulk pixels should still be visible as edges.
+
+def light_point_highlight(px, x, y, dx, dy):
+    light_overlay(px, x, y, 0.45)
+    xx, yy = x + dx, y + dy
+    if 0 <= xx < TILE_W and 0 <= yy < TILE_H:
+        light_overlay(px, xx, yy, 0.18)
+
+
+def black_glow_scanline(px, x, y, dx, dy):
+    # darker values (as requested)
+    x1, y1 = x + dx, y + dy
+    if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H:
+        shadow_overlay_force_alpha(px, x1, y1, 0.20)
+    x2, y2 = x + 2*dx, y + 2*dy
+    if 0 <= x2 < TILE_W and 0 <= y2 < TILE_H:
+        shadow_overlay_force_alpha(px, x2, y2, 0.10)
+
+
+def apply_point_shading(img: Image.Image,
+                        run_map: Dict[Tuple[int, int], Set[RunDir]],
+                        per_run_flags: Dict[Tuple[int, int], Dict[RunDir, dict]]) -> None:
+    """
+    Apply ONLY point-driven treatments:
+      - DARK edge points -> shadow band inward along run axis (toward inside)
+      - LIGHT edge points -> highlight inward along run axis (toward inside)
+      - glow outward along run axis on BOTH sides of the point
+    """
+    px = img.load()
+
+    for (x, y), flags in per_run_flags.items():
+        for rd, f in flags.items():
+            if not f.get("edge_perp") or not f.get("point"):
+                continue
+
+            scan1, scan2 = f["scan"]
+
+            # Determine inward direction: the scan step that is inside the run
+            nx, ny = x + scan1[0], y + scan1[1]
+            if 0 <= nx < TILE_W and 0 <= ny < TILE_H and _opaque(px, nx, ny):
+                inward = scan1
+                outward = scan2
+            else:
+                inward = scan2
+                outward = scan1
+
+            if f.get("edge_side") == EdgeSide.DARK:
+                shadow_band_inward(px, x, y, inward[0], inward[1])
+            elif f.get("edge_side") == EdgeSide.LIGHT:
+                light_point_highlight(px, x, y, inward[0], inward[1])
+
+            # glow both outward directions (only if outside)
+            for dx, dy in (scan1, scan2):
+                tx, ty = x + dx, y + dy
+                if not (0 <= tx < TILE_W and 0 <= ty < TILE_H and _opaque(px, tx, ty)):
+                    black_glow_scanline(px, x, y, dx, dy)
+
+            break
+
+
+# ============================================================
+# Classification visualization
+# ============================================================
+
+def debug_color_for_pixel(dirs: Set[RunDir], per_run_flags: Dict[RunDir, dict]) -> Tuple[int, int, int, int]:
+    # simple base coloring, edge_side overlay handled in build_classification_image
     if len(dirs) > 1:
-        # Caller must decide whether this bulk pixel is edge-adjacent.
         return (255, 255, 255, 255)
 
     rd = next(iter(dirs))
     f = per_run_flags.get(rd, {})
 
-    # Point (special scan-edge)
     if f.get("point"):
         if rd == RunDir.ISO_X:
-            return (255, 0, 255, 255)   # magenta
+            return (255, 0, 255, 255)
         if rd == RunDir.ISO_Y:
-            return (255, 255, 0, 255)   # yellow
-        return (255, 0, 0, 255)         # red
+            return (255, 255, 0, 255)
+        return (255, 0, 0, 255)
 
-    # Scan-edge (non-point)
     if f.get("edge_scan"):
         if rd == RunDir.ISO_X:
-            return (0, 255, 255, 255)   # cyan
+            return (0, 255, 255, 255)
         if rd == RunDir.ISO_Y:
-            return (0, 255, 0, 255)     # green
-        return (255, 128, 0, 255)       # orange
+            return (0, 255, 0, 255)
+        return (255, 128, 0, 255)
 
-    # Perpendicular silhouette edge
     if f.get("edge_perp"):
         if rd == RunDir.ISO_X:
-            return (0, 0, 180, 255)     # deep blue
+            return (0, 0, 180, 255)
         if rd == RunDir.ISO_Y:
-            return (0, 128, 128, 255)   # teal
-        return (128, 64, 0, 255)        # brown
+            return (0, 128, 128, 255)
+        return (128, 64, 0, 255)
 
-    # Interior
     return (64, 64, 64, 255)
 
 
-# ============================================================
-# Classification image builder (debug visualization)
-# ============================================================
-def build_classification_image(
-    run_map: Dict[Tuple[int, int], Set[RunDir]],
-    per_run_flags: Dict[Tuple[int, int], Dict[RunDir, Dict[str, bool]]],
-    effective_bulk: Set[Tuple[int, int]],
-    bulk_adjacent_edge: Set[Tuple[int, int]],
-) -> Image.Image:
-    """
-    Build a fresh RGBA image visualizing classification.
-    This NEVER mutates the shaded render.
-    """
+def build_classification_image(run_map: Dict[Tuple[int, int], Set[RunDir]],
+                               per_run_flags: Dict[Tuple[int, int], Dict[RunDir, dict]],
+                               effective_bulk: Set[Tuple[int, int]],
+                               bulk_adjacent_edge: Set[Tuple[int, int]]) -> Image.Image:
     cls_img = Image.new("RGBA", (TILE_W, TILE_H), (0, 0, 0, 0))
     px = cls_img.load()
 
@@ -627,51 +437,37 @@ def build_classification_image(
         if not dirs:
             continue
 
-        # 1. True bulk interior
         if (x, y) in effective_bulk and (x, y) not in bulk_adjacent_edge:
             px[x, y] = (255, 255, 255, 255)
-
-        # 2. Bulk edge
-        elif (x, y) in effective_bulk and (x, y) in bulk_adjacent_edge:
-            px[x, y] = (220, 220, 220, 255)
-
-        # 3. Non-bulk bulk-adjacent edge
-        elif (x, y) in bulk_adjacent_edge:
+            continue
+        if (x, y) in bulk_adjacent_edge:
             px[x, y] = (200, 200, 200, 255)
+            continue
 
-        # 4. Normal classification with edge_side OVERLAY
-        else:
-            flags = per_run_flags.get((x, y), {})
+        flags = per_run_flags.get((x, y), {})
+        r, g, b, a = debug_color_for_pixel(dirs, flags)
 
-            # Base classification color (unchanged)
-            base_color = debug_color_for_pixel(dirs, flags)
-            r, g, b, a = base_color
+        # overlay edge_side
+        for rd, f in flags.items():
+            if f.get("edge_perp") and f.get("edge_side") is not None:
+                if f["edge_side"] == EdgeSide.LIGHT:
+                    r = min(255, int(r * 0.5 + 255 * 0.5))
+                    g = min(255, int(g * 0.5 + 255 * 0.5))
+                    b = int(b * 0.5)
+                else:
+                    r = int(r * 0.3)
+                    g = int(g * 0.3)
+                    b = int(b * 0.3)
+                break
 
-            # Overlay edge_side if this is a silhouette edge
-            for rd, f in flags.items():
-                if f.get("edge_perp") and f.get("edge_side") is not None:
-                    if f["edge_side"] == EdgeSide.LIGHT:
-                        # LIGHT edge overlay: yellow tint
-                        r = min(255, int(r * 0.5 + 255 * 0.5))
-                        g = min(255, int(g * 0.5 + 255 * 0.5))
-                        b = int(b * 0.5)
-                    else:
-                        # DARK edge overlay: black tint
-                        r = int(r * 0.3)
-                        g = int(g * 0.3)
-                        b = int(b * 0.3)
-                    break
-
-            px[x, y] = (r, g, b, a)
+        px[x, y] = (r, g, b, a)
 
     return cls_img
 
 
 # ============================================================
-# Render orchestration
+# Render jobs / geometry
 # ============================================================
-
-from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class RenderJob:
@@ -691,261 +487,110 @@ def render(job: RenderJob, geometry: dict, pipe_sets: dict) -> Image.Image:
 
     half = TILE_W // 4  # 32
 
-    # ---------------- Geometry (expanded floor geometry block) ----------------
-
-    # Floor pipes (Pillow stroke + intent emission)
+    # ---------------- Geometry: floor ----------------
     if job.surface == "floor":
-
-        # --- Straight ---
         if job.shape == "straight":
             if job.variant == "EW":
                 p1 = iso_project_floor(-half, 0)
                 p2 = iso_project_floor(+half, 0)
-                draw_floor_stroke_with_intent(
-                    img, run_map, p1, p2,
-                    thickness=thickness,
-                    run_dir=RunDir.ISO_X,
-                    color=base_color,
-                )
+                draw_stroke_with_intent(img, run_map, p1, p2, width=thickness, run_dir=RunDir.ISO_X, color=base_color, mode="floor")
             elif job.variant == "NS":
                 p1 = iso_project_floor(0, -half)
                 p2 = iso_project_floor(0, +half)
-                draw_floor_stroke_with_intent(
-                    img, run_map, p1, p2,
-                    thickness=thickness,
-                    run_dir=RunDir.ISO_Y,
-                    color=base_color,
-                )
+                draw_stroke_with_intent(img, run_map, p1, p2, width=thickness, run_dir=RunDir.ISO_Y, color=base_color, mode="floor")
 
-        # --- Elbows ---
+        elif job.shape == "end":
+            if job.variant == "N":
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(0, -half),
+                                        width=thickness, run_dir=RunDir.ISO_Y, color=base_color, mode="floor")
+            elif job.variant == "S":
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(0, +half),
+                                        width=thickness, run_dir=RunDir.ISO_Y, color=base_color, mode="floor")
+            elif job.variant == "E":
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(+half, 0),
+                                        width=thickness, run_dir=RunDir.ISO_X, color=base_color, mode="floor")
+            elif job.variant == "W":
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(-half, 0),
+                                        width=thickness, run_dir=RunDir.ISO_X, color=base_color, mode="floor")
+
         elif job.shape == "elbow":
-            # All elbows originate at center (0,0)
             if job.variant == "NE":
-                # ISO_Y north + ISO_X east
-                draw_floor_stroke_with_intent(
-                    img, run_map,
-                    iso_project_floor(0, 0), iso_project_floor(0, -half),
-                    thickness=thickness, run_dir=RunDir.ISO_Y, color=base_color
-                )
-                draw_floor_stroke_with_intent(
-                    img, run_map,
-                    iso_project_floor(0, 0), iso_project_floor(+half, 0),
-                    thickness=thickness, run_dir=RunDir.ISO_X, color=base_color
-                )
-
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(0, -half),
+                                        width=thickness, run_dir=RunDir.ISO_Y, color=base_color, mode="floor")
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(+half, 0),
+                                        width=thickness, run_dir=RunDir.ISO_X, color=base_color, mode="floor")
             elif job.variant == "ES":
-                draw_floor_stroke_with_intent(
-                    img, run_map,
-                    iso_project_floor(0, 0), iso_project_floor(+half, 0),
-                    thickness=thickness, run_dir=RunDir.ISO_X, color=base_color
-                )
-                draw_floor_stroke_with_intent(
-                    img, run_map,
-                    iso_project_floor(0, 0), iso_project_floor(0, +half),
-                    thickness=thickness, run_dir=RunDir.ISO_Y, color=base_color
-                )
-
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(+half, 0),
+                                        width=thickness, run_dir=RunDir.ISO_X, color=base_color, mode="floor")
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(0, +half),
+                                        width=thickness, run_dir=RunDir.ISO_Y, color=base_color, mode="floor")
             elif job.variant == "SW":
-                draw_floor_stroke_with_intent(
-                    img, run_map,
-                    iso_project_floor(0, 0), iso_project_floor(0, +half),
-                    thickness=thickness, run_dir=RunDir.ISO_Y, color=base_color
-                )
-                draw_floor_stroke_with_intent(
-                    img, run_map,
-                    iso_project_floor(0, 0), iso_project_floor(-half, 0),
-                    thickness=thickness, run_dir=RunDir.ISO_X, color=base_color
-                )
-
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(0, +half),
+                                        width=thickness, run_dir=RunDir.ISO_Y, color=base_color, mode="floor")
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(-half, 0),
+                                        width=thickness, run_dir=RunDir.ISO_X, color=base_color, mode="floor")
             elif job.variant == "WN":
-                draw_floor_stroke_with_intent(
-                    img, run_map,
-                    iso_project_floor(0, 0), iso_project_floor(-half, 0),
-                    thickness=thickness, run_dir=RunDir.ISO_X, color=base_color
-                )
-                draw_floor_stroke_with_intent(
-                    img, run_map,
-                    iso_project_floor(0, 0), iso_project_floor(0, -half),
-                    thickness=thickness, run_dir=RunDir.ISO_Y, color=base_color
-                )
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(-half, 0),
+                                        width=thickness, run_dir=RunDir.ISO_X, color=base_color, mode="floor")
+                draw_stroke_with_intent(img, run_map, iso_project_floor(0, 0), iso_project_floor(0, -half),
+                                        width=thickness, run_dir=RunDir.ISO_Y, color=base_color, mode="floor")
 
-        # --- Tee ---
         elif job.shape == "tee":
-            # Center + three arms
             if job.variant == "NEW":
-                arms = [
-                    (RunDir.ISO_Y, (0, 0), (0, -half)),   # N
-                    (RunDir.ISO_X, (0, 0), (+half, 0)),   # E
-                    (RunDir.ISO_X, (0, 0), (-half, 0)),   # W
-                ]
+                arms = [(RunDir.ISO_Y, (0,0), (0,-half)), (RunDir.ISO_X, (0,0), (+half,0)), (RunDir.ISO_X, (0,0), (-half,0))]
             elif job.variant == "NES":
-                arms = [
-                    (RunDir.ISO_Y, (0, 0), (0, -half)),   # N
-                    (RunDir.ISO_X, (0, 0), (+half, 0)),   # E
-                    (RunDir.ISO_Y, (0, 0), (0, +half)),   # S
-                ]
+                arms = [(RunDir.ISO_Y, (0,0), (0,-half)), (RunDir.ISO_X, (0,0), (+half,0)), (RunDir.ISO_Y, (0,0), (0,+half))]
             elif job.variant == "ESW":
-                arms = [
-                    (RunDir.ISO_X, (0, 0), (+half, 0)),   # E
-                    (RunDir.ISO_Y, (0, 0), (0, +half)),   # S
-                    (RunDir.ISO_X, (0, 0), (-half, 0)),   # W
-                ]
+                arms = [(RunDir.ISO_X, (0,0), (+half,0)), (RunDir.ISO_Y, (0,0), (0,+half)), (RunDir.ISO_X, (0,0), (-half,0))]
             elif job.variant == "NSW":
-                arms = [
-                    (RunDir.ISO_Y, (0, 0), (0, -half)),   # N
-                    (RunDir.ISO_Y, (0, 0), (0, +half)),   # S
-                    (RunDir.ISO_X, (0, 0), (-half, 0)),   # W
-                ]
+                arms = [(RunDir.ISO_Y, (0,0), (0,-half)), (RunDir.ISO_Y, (0,0), (0,+half)), (RunDir.ISO_X, (0,0), (-half,0))]
             else:
                 arms = []
+            for rd, (x1,y1), (x2,y2) in arms:
+                draw_stroke_with_intent(img, run_map, iso_project_floor(x1,y1), iso_project_floor(x2,y2),
+                                        width=thickness, run_dir=rd, color=base_color, mode="floor")
 
-            for rd, (x1, y1), (x2, y2) in arms:
-                draw_floor_stroke_with_intent(
-                    img, run_map,
-                    iso_project_floor(x1, y1),
-                    iso_project_floor(x2, y2),
-                    thickness=thickness,
-                    run_dir=rd,
-                    color=base_color,
-                )
-
-        # --- Cross ---
         elif job.shape == "cross":
-            arms = [
-                (RunDir.ISO_Y, (0, 0), (0, -half)),   # N
-                (RunDir.ISO_Y, (0, 0), (0, +half)),   # S
-                (RunDir.ISO_X, (0, 0), (+half, 0)),   # E
-                (RunDir.ISO_X, (0, 0), (-half, 0)),   # W
-            ]
-            for rd, (x1, y1), (x2, y2) in arms:
-                draw_floor_stroke_with_intent(
-                    img, run_map,
-                    iso_project_floor(x1, y1),
-                    iso_project_floor(x2, y2),
-                    thickness=thickness,
-                    run_dir=rd,
-                    color=base_color,
-                )
+            arms = [(RunDir.ISO_Y, (0,0), (0,-half)), (RunDir.ISO_Y, (0,0), (0,+half)),
+                    (RunDir.ISO_X, (0,0), (+half,0)), (RunDir.ISO_X, (0,0), (-half,0))]
+            for rd, (x1,y1), (x2,y2) in arms:
+                draw_stroke_with_intent(img, run_map, iso_project_floor(x1,y1), iso_project_floor(x2,y2),
+                                        width=thickness, run_dir=rd, color=base_color, mode="floor")
 
-    # Wall straights (geometry-only, already positioned correctly in your pipeline)
+    # ---------------- Geometry: walls (straights only, current) ----------------
     if job.surface in ("wall_n", "wall_w") and job.shape == "straight":
-        # Vertical riser (ISO_Z)
         if job.variant == "NS":
-            # North wall riser base is at north-face center on floor; west wall at west-face center on floor.
-            if job.surface == "wall_n":
-                base = iso_project_floor(0, -half)
-            else:
-                base = iso_project_floor(-half, 0)
-
+            # floor-resting riser base
+            base = iso_project_floor(0, -half) if job.surface == "wall_n" else iso_project_floor(-half, 0)
             p1 = base
             p2 = (base[0], base[1] - WALL_HEIGHT_PX)
-            draw_wall_multiline_with_intent(
-                img, run_map, p1, p2,
-                thickness=thickness,
-                run_dir=RunDir.ISO_Z,
-                color=base_color,
-                offset_axis="x",
-            )
+            draw_stroke_with_intent(img, run_map, p1, p2, width=thickness, run_dir=RunDir.ISO_Z, color=base_color, mode="wall")
 
-        # Horizontal run elevated (ISO_X or ISO_Y)
         if job.variant == "EW":
-            lift = WALL_CUBE_PX + (WALL_CUBE_PX // 2)  # center of second cube
-
+            lift = WALL_CUBE_PX + (WALL_CUBE_PX // 2)
             if job.surface == "wall_n":
-                # Horizontal on north face uses ISO_X direction
                 p1 = iso_project_floor(-half, -half)
                 p2 = iso_project_floor(+half, -half)
-                p1 = (p1[0], p1[1] - lift)
-                p2 = (p2[0], p2[1] - lift)
-                draw_wall_multiline_with_intent(
-                    img, run_map, p1, p2,
-                    thickness=thickness,
-                    run_dir=RunDir.ISO_X,
-                    color=base_color,
-                    offset_axis="y",
-                )
+                rd = RunDir.ISO_X
             else:
-                # Horizontal on west face uses ISO_Y direction
                 p1 = iso_project_floor(-half, -half)
                 p2 = iso_project_floor(-half, +half)
-                p1 = (p1[0], p1[1] - lift)
-                p2 = (p2[0], p2[1] - lift)
-                draw_wall_multiline_with_intent(
-                    img, run_map, p1, p2,
-                    thickness=thickness,
-                    run_dir=RunDir.ISO_Y,
-                    color=base_color,
-                    offset_axis="y",
-                )
+                rd = RunDir.ISO_Y
+            p1 = (p1[0], p1[1] - lift)
+            p2 = (p2[0], p2[1] - lift)
+            draw_stroke_with_intent(img, run_map, p1, p2, width=thickness, run_dir=rd, color=base_color, mode="wall")
 
     # ---------------- Classification ----------------
     per_run_flags = classify_per_run(img, run_map)
 
-    # ---------------- Floor shading: EDGE-POINT SHADOW + LIGHT (ALL SHAPES) ----------------
-    if ENABLE_FLOOR_SHADING and job.surface == "floor":
-        px = img.load()
+    # ---------------- Shading (point-driven) ----------------
+    if ENABLE_SHADING:
+        apply_point_shading(img, run_map, per_run_flags)
 
-        for (x, y), flags in per_run_flags.items():
-            for rd, f in flags.items():
-                # Only silhouette EDGE POINTS participate
-                if not f.get("edge_perp"):
-                    continue
-                if not f.get("point"):
-                    continue
-
-                # Determine inward direction ALONG THE SCANLINE (old behavior)
-                (scan1, scan2), _ = neighbor_offsets_for_run(rd)
-
-                # Choose the scan direction that stays inside the shape
-                x1, y1 = x + scan1[0], y + scan1[1]
-                if 0 <= x1 < TILE_W and 0 <= y1 < TILE_H and _opaque(px, x1, y1):
-                    dx, dy = scan1
-                else:
-                    dx, dy = scan2
-
-                if f.get("edge_side") == EdgeSide.DARK:
-                    shadow_band_inward(px, x, y, dx, dy)
-                elif f.get("edge_side") == EdgeSide.LIGHT:
-                    light_point_highlight(px, x, y, dx, dy)
-
-                break  # once per pixel
-
-
-
-    # ---------------- Floor shading: POINT-DRIVEN BLACK GLOW (ALL SHAPES) ----------------
-    if ENABLE_FLOOR_SHADING and job.surface == "floor":
-        px = img.load()
-
-        for (x, y), flags in per_run_flags.items():
-            for rd, f in flags.items():
-                if not f.get("edge_perp"):
-                    continue
-                if not f.get("point"):
-                    continue
-
-                # Scanline directions for this run
-                (scan1, scan2), _ = neighbor_offsets_for_run(rd)
-
-                # Determine OUTWARD scan direction(s)
-                for dx, dy in (scan1, scan2):
-                    nx, ny = x + dx, y + dy
-                    if not (0 <= nx < TILE_W and 0 <= ny < TILE_H and _opaque(px, nx, ny)):
-                        # dx,dy points OUTSIDE the shape
-                        black_glow_scanline(px, x, y, dx, dy)
-
-                break  # once per pixel
-
-
-    # ---------------- Classification debug image (separate) ----------------
+    # ---------------- Classification image (separate) ----------------
     if DEBUG_CLASSIFICATION:
         effective_bulk = compute_effective_bulk(img, run_map)
-        bulk_adjacent_edge = compute_bulk_adjacent_edge(img, run_map, effective_bulk)   
-        cls_img = build_classification_image(
-            run_map,
-            per_run_flags,
-            effective_bulk,
-            bulk_adjacent_edge,
-        )
-        img._classification = cls_img  # attach for exporter
+        bulk_adjacent_edge = compute_bulk_adjacent_edge(img, run_map, effective_bulk)
+        img._classification = build_classification_image(run_map, per_run_flags, effective_bulk, bulk_adjacent_edge)
 
     return img
