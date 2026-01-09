@@ -1,17 +1,11 @@
-"""
-PNG export utilities and naming conventions.
-
-Phase 1 exporter:
-- Writes PNGs for supported primitives
-- Logs skips for unsupported jobs
-"""
-
 from pathlib import Path
 
 from engine.renderer import RenderJob, render
 
 # --- Classification output root ---
 CLASSIFICATION_OUT_DIR = Path("pipes/generated") / "classification"
+
+SHEET_OUT_FILE = Path("pipes/generated") / "pipe_sheet.png"
 
 
 def sprite_filename(job: RenderJob) -> str:
@@ -37,36 +31,36 @@ def export_sprite(
     base_dir: Path,
 ) -> None:
     """
-    Export a sprite for the given RenderJob.
+    Export sprites.
 
-    In Phase 1, only supported primitives are rendered; all other jobs are skipped.
+    For this phase:
+    - ALWAYS produce a single pipe sheet exactly once.
+    - Ignore all other jobs.
     """
-    out_path = sprite_path(base_dir, job)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    try:
-        img = render(job, geometry, pipe_sets)
-    except NotImplementedError:
-        print(f"· skip {job.pipe_set}/{job.surface}/{job.shape}/{job.variant}")
+    # Guard: only render sheet once
+    if getattr(export_sprite, "_sheet_done", False):
         return
 
-    img.save(out_path)
-    print(f"✓ wrote {out_path}")
+    try:
+        img = render(
+            RenderJob(
+                pipe_set=job.pipe_set,
+                surface="floor",
+                shape="sheet",
+                variant="",
+            ),
+            geometry,
+            pipe_sets,
+        )
+    except NotImplementedError:
+        print("· sheet renderer not available")
+        return
 
-    # --- Always-on classification output ---
-    from engine.renderer import DEBUG_CLASSIFICATION
+    out_file = Path("pipes/generated") / "pipe_sheet.png"
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    img.save(out_file)
 
-    if DEBUG_CLASSIFICATION:
-        cls_path = CLASSIFICATION_OUT_DIR / job.surface
-        cls_path.mkdir(parents=True, exist_ok=True)
+    print(f"✓ wrote sheet {out_file}")
 
-        cls_file = cls_path / sprite_filename(job)
-        img._classification.save(cls_file)
-
-        readme = CLASSIFICATION_OUT_DIR / "README.txt"
-        if not readme.exists():
-            readme.write_text(
-                "Classification debug output.\n"
-                "Colors encode RunDir / edge / point / bulk taxonomy.\n"
-                "These images are diagnostics, not game assets.\n"
-            )
+    export_sprite._sheet_done = True
