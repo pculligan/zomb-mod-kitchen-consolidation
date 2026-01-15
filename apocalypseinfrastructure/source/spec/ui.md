@@ -101,6 +101,31 @@ This ensures players can visually parse networks without inspection.
 
 ## 3. Pipe Orientation and Alignment
 
+---
+
+## 3.4 Sprite Selection Contract (Authoritative)
+
+Sprite selection is governed by a single, immutable contract:
+
+```
+sprite = f(resource, face, connectivityMask)
+```
+
+Where:
+- `resource` is the topology resource (Water, Fuel, Propane, etc.)
+- `face` is one of: `floor`, `north`, `east`, `south`, `west`
+- `connectivityMask` is the cached 4-bit mask derived at topology-change time
+
+**Invariants:**
+- Ghost preview uses the **exact same sprite selection** as commit.
+- No runtime neighbor inspection occurs during render.
+- Cached connectivity is the **single source of truth** for visuals.
+- If a sprite is incorrect, the defect is in connectivity derivation, not rendering.
+
+This contract must never be bypassed or duplicated.
+
+---
+
 Within a lane:
 
 - North–South and East–West pipe segments are distinct sprites
@@ -148,11 +173,39 @@ This enables dense infrastructure without ambiguity.
 
 ## 6. Rendering Strategy
 
+
 Sprites must not be positioned using offsets from the tile center.
 
 Center-based offsets produce diagonal drift in isometric projection and
 result in ambiguous visual connections. All offsets must be derived from
 the defined screen-space anchor points instead.
+
+---
+
+### 6.X Sprite Authority Invariant (Authoritative)
+
+**All sprite selection and application is owned exclusively by topology entities.**
+
+- UI code **must never** choose, derive, or apply sprites.
+- Controllers **must never** apply sprites.
+- Placement preview **may display** sprite keys, but may not apply them.
+- The renderer **only displays** what the entity has already derived.
+
+The only valid place where a sprite may be applied to a world object is:
+
+```
+Entity:updateSpritesFromConnectivity()
+```
+
+This invariant ensures:
+- Preview parity with commit
+- No visual drift between UI and world state
+- No duplicated sprite logic
+- Deterministic adjacency updates
+
+If a sprite is wrong, the bug is **always** in topology derivation, never in UI or rendering.
+
+---
 
 ### 6.1 Chosen Strategy: Pre-Drawn Sprites per Resource
 

@@ -1,245 +1,236 @@
-
-
 # Testing Strategy & Validation Plan
 
-This document defines a **layered testing approach** for the irrigation, water,
-pumpable water, fuel, and propane systems.
+This document defines a **reality-based, layered testing approach** for the
+resource network system (water, pumpable water, fuel, propane, electricity).
 
-The goal is to:
-- Minimize slow, manual UI-driven testing
+The goals are to:
+- Minimize slow, manual UI testing
 - Catch regressions early and deterministically
-- Make complex interactions inspectable and debuggable
-- Support confident iteration as features expand
+- Make topology and flow behavior inspectable
+- Support confident iteration as complexity increases
 
-This strategy is designed specifically for Project Zomboid’s modding environment
-and assumes explicit connectors, event-driven logic, and minimal background ticking.
+This strategy is designed specifically for **Project Zomboid modding** and assumes:
+- Explicit connectors
+- Event-driven topology updates
+- Cached connectivity and sprite derivation
+- Minimal background ticking
 
 ---
 
-## Testing Philosophy
+## Core Testing Principle
 
-Testing follows a simple principle:
+> **Test logic before visuals, and visuals before gameplay.  
+> UI testing is last, not first.**
 
-> **Test logic before visuals, and visuals before gameplay.**
-
-Manual gameplay testing is valuable for *feel*, but poor for validating correctness.
-Most correctness can and should be validated without touching the UI.
+If correctness requires clicking around the UI, the system is already too opaque.
 
 ---
 
 ## Layered Testing Model
 
-Testing is organized into four layers, from fastest to slowest.
+Testing is organized into **six layers**, from fastest to slowest.
 
-Each higher layer assumes the lower layers are already reliable.
+Each higher layer assumes all lower layers are already reliable.
 
 ---
 
 ## Layer 1 — Pure Logic Tests (No World, No UI)
 
-**Purpose:**  
+**Purpose**  
 Validate core rules and invariants without relying on the game world or renderer.
 
-**Characteristics:**
+**Characteristics**
 - Fast
 - Deterministic
 - Repeatable
-- Minimal dependencies
+- No Project Zomboid runtime
 
-**What to test here:**
-- Node registration and deregistration
+**What belongs here**
+- Node registration / deregistration
 - Neighbor discovery
 - Network merge and split behavior
 - Resource isolation by type
-- Valve open/close gating
-- Equalization eligibility (Store vs Observe)
-- Availability propagation
-- Connector activation/deactivation rules
+- Valve open/close gating rules
+- Allocation strategies
+- Capability ordering invariants
 
-**Approach:**
-- Use mock nodes with fake positions and resource types
-- Call core network functions directly
-- Assert expected network membership and availability via logs or assertions
-
-**Guiding rule:**
-If a rule cannot be tested here, it is likely too tightly coupled to the UI.
+**Rule**  
+If a rule cannot be tested here, it is likely incorrectly coupled.
 
 ---
 
-## Layer 2 — Scripted World Tests (In-Game, No UI Interaction)
+## Layer 2 — Inspector-Driven Tests (World-Aware, No UI)
 
-**Purpose:**  
-Validate integration with the actual game world while avoiding manual interaction.
+**Purpose**  
+Validate topology state by *inspecting* the world, not interacting with it.
 
-**Characteristics:**
+**Characteristics**
 - Runs inside Project Zomboid
-- No clicking, dragging, or crafting
-- Fully script-driven
+- No clicking or context menus
+- No placement or removal via UI
 
-**What to test here:**
-- Connector placement and removal
-- Observed object destruction or pickup
-- Valve toggling
-- Pump activation/deactivation
-- Equalization behavior with real storage objects
-- Resource availability after merges/splits
+**What belongs here**
+- Which entities exist on a square
+- Which faces are occupied
+- Which connectors are active
+- Which resources are present
+- Network membership consistency
+- Cached faceConnectivity correctness
 
-**Approach:**
-- Write test Lua scripts that:
-  - Spawn world objects at fixed coordinates
-  - Attach connectors programmatically
-  - Trigger events (e.g., destroy object, toggle valve)
-  - Log outcomes deterministically
+**Tools**
+- `SquareInspector`
+- `PipeInspector`
+- `ConnectorInspector`
+- `ResourceInspector`
 
-**Example flow:**
-- Spawn rain barrel → attach connector
-- Place water pipe → verify availability
-- Close valve → verify downstream loss
-- Destroy barrel → verify connector deactivation
-
-**Benefit:**
-This layer catches 90% of real bugs without human input.
+This layer validates the **observable truth** the UI will later rely on.
 
 ---
 
-## Layer 3 — Visual Validation Scenes
+## Layer 3 — Preview Validity Tests (No Placement)
 
-**Purpose:**  
-Ensure visual grammar and rendering rules are upheld.
+**Purpose**  
+Validate placement logic **without committing anything to the world**.
 
-**Characteristics:**
+**Characteristics**
+- World-aware
+- Read-only
+- Extremely fast feedback
+
+**What belongs here**
+- Placement validity rules
+- Rejection reasons
+- Face eligibility
+- Derived connectivity masks
+- Sprite selection correctness
+
+**Approach**
+- Call `Placement.preview(...)` directly
+- Assert:
+  - `valid`
+  - `reason` (when invalid)
+  - `attachedFaces`
+  - `faceConnectivity`
+  - `spriteByFace`
+
+**Rule**  
+If preview logic is wrong, commit will also be wrong.
+
+---
+
+## Layer 4 — Scripted World Mutation Tests (No UI Interaction)
+
+**Purpose**  
+Validate integration with the real world while avoiding manual interaction.
+
+**Characteristics**
+- Runs inside Project Zomboid
+- Fully script-driven
+- No menus, clicks, or crafting
+
+**What belongs here**
+- Entity attach / detach
+- Connector activation / deactivation
+- Valve toggling
+- Observed object destruction
+- Network splits and merges
+- Resource availability after topology changes
+
+This layer catches most real bugs without human input.
+
+---
+
+## Layer 5 — Visual Validation Scenes
+
+**Purpose**  
+Ensure the visual grammar matches topology and cached connectivity.
+
+**Characteristics**
 - Minimal interaction
 - High visual density
-- Easy to re-run and compare
+- Easy to re-run
 
-**What to test here:**
+**What belongs here**
 - Lane alignment across resources
-- Multiple pipes in a single tile
-- Cross, T, and corner orientation correctness
-- Valve open/closed visuals
-- Connector grounding in the correct lane
-- Pumps bridging lanes correctly
+- Pipe connectivity shapes
+- Wall vs floor correctness
+- Valve open / closed / bypassed visuals
+- Sprite parity between preview and commit
 
-**Approach:**
-- Create dedicated “test maps” or zones containing:
-  - A grid of all pipe orientations
-  - All resource types in the same tiles
-  - Valves in every state
-- Add developer hotkeys:
-  - Spawn full test grid
-  - Clear test grid
-
-**Validation method:**
-- Visual inspection
-- Screenshot comparison between versions
-
-This layer prevents “it looks connected, why won’t it go?” regressions.
+This layer prevents:
+> “It looks connected — why won’t it go?”
 
 ---
 
-## Layer 4 — Manual Gameplay Testing
+## Layer 6 — Manual Gameplay Testing (Last)
 
-**Purpose:**  
-Evaluate player experience, pacing, and fun.
+**Purpose**  
+Evaluate pacing, clarity, and fun.
 
-**Characteristics:**
+**Characteristics**
 - Slow
 - Subjective
-- Irreplaceable for feel
+- Irreplaceable for *feel*
 
-**What to test here:**
-- Progression pacing (early/mid/late game)
-- Tuning usefulness and clarity
+**What belongs here**
+- Progression balance
+- Cognitive load
 - Maintenance annoyance vs drama
-- Failure recoverability
-- Cognitive load for new players
+- Failure recovery
 
-**What not to rely on this layer for:**
-- Verifying logic correctness
-- Catching edge cases
+**What does NOT belong here**
+- Logic correctness
+- Edge-case validation
 - Regression detection
 
-Manual testing should confirm *experience*, not correctness.
+If you’re debugging here, you’re already too late.
 
 ---
 
-## Development Optimizations
+## Developer Optimizations
 
 ### Developer Mode
 
-A dedicated developer mode should enable:
+Developer mode should allow:
 - Instant builds
 - Free materials
-- Instant tuning and repair
-- Forced degradation or damage
+- Forced damage or degradation
 - Verbose logging
+- Direct state inspection
 
 Testing should never require survival pacing.
 
 ---
 
-### Inspection as a Debug Tool
+## Inspection as the Primary Debug Interface
 
-All connectors should expose inspectable state, including:
+All entities and connectors should expose inspectable state:
 - Resource type
-- Active/inactive
+- Active / inactive
 - Network identifier
-- Capabilities (Provide/Consume/Store)
-- Tuning modifiers
+- Capabilities (Provide / Consume / Store)
+- Cached face connectivity
 - Degradation state (if enabled)
 
-Inspection is the primary debugging interface.
-
----
-
-### Logging Strategy
-
-For development builds:
-- Log network merges and splits
-- Log drain and equalization events
-- Log valve state changes
-- Log connector activation/deactivation
-
-Deterministic logs are more valuable than visual debugging.
-
----
-
-## Vertical Slice Testing
-
-Before expanding systems, validate at least one complete flow end-to-end:
-
-Examples:
-- Rain barrel → pipe → valve → irrigation
-- Shore intake → pump → storage → house water
-- Fuel barrel → hose → generator
-- Propane tank → house service → stove
-
-Each vertical slice should be:
-- Scriptable
-- Repeatable
-- Inspectable
+Inspection is faster and clearer than log spelunking.
 
 ---
 
 ## Regression Strategy
 
 When bugs are found:
-- Reproduce via Layer 1 or Layer 2 tests if possible
-- Add a dedicated test script for the case
-- Never rely on “manual memory” of fixes
+1. Reproduce in the lowest possible layer
+2. Add a test for that case
+3. Never rely on memory of fixes
 
-Over time, the test suite becomes a safety net.
+The test suite is your long-term safety net.
 
 ---
 
 ## Summary
 
 This testing strategy:
-
-- Reduces reliance on manual UI testing
-- Encourages deterministic validation
-- Aligns with the explicit, event-driven system design
-- Scales as new resources and connectors are added
-
-Complex systems require **structured testing**.
-This plan makes complexity manageable.
+- Matches how the system is actually built
+- Avoids UI-driven debugging
+- Scales with new resources and connectors
+- Makes complexity understandable and controllable
